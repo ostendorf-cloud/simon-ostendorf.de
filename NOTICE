@@ -1,0 +1,30 @@
+Notice
+
+LICENSE covers the software in this repository. This file covers the third
+party components that software depends on and that LICENSE does not cover.
+
+## Third party components
+
+The software depends on components that are not covered by LICENSE and that
+carry their own terms. Nothing in LICENSE restricts them, and nothing here
+grants anything beyond what their own licences grant.
+
+The direct dependencies, and the licence each one carries:
+
+- `github.com/ostendorf-cloud/govue`, the Go module and the Vue package:
+  Apache License 2.0
+- `github.com/prometheus/client_golang`, reached through govue:
+  Apache License 2.0
+- Vue: MIT License
+- Tailwind CSS: MIT License
+
+Each dependency's full licence text ships with the dependency itself, in the
+Go module cache and in `web/node_modules`, and is not reproduced here. The
+complete set, including transitive dependencies, is whatever `go.mod`,
+`go.sum`, `web/package.json` and `web/pnpm-lock.yaml` resolve to at a given
+commit; those four files are the authoritative list, not this one.
+
+Nothing else is tracked here yet. There is no logo or imagery, no page text
+beyond the scaffold placeholder, and no imprint or privacy page implemented
+in this milestone; see AGENTS.md's "Scope of this milestone" for what is
+still to come.
