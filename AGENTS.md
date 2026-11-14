@@ -80,8 +80,6 @@ placeholder page. Nothing below is implemented yet:
   `ostendorf-cloud/workflows`'s reusable workflows at the exact tag `v0.2.2`, the newest tag
   that exists, not a floating `v0` major tag: `ostendorf-cloud/workflows` has not cut one yet.
   Repoint at `v0` once it exists.
-- No CodeQL workflow. Code scanning on a private repository needs GitHub Advanced Security,
-  which this account does not have.
 - The Helm chart lives at `charts/simon-ostendorf.de/`, matching the repository's own name, but
   its `Chart.yaml` `name` and every rendered object name use `simon-ostendorf-de` instead: a
   literal dot is invalid in a `Service`'s `metadata.name` (RFC 1035 label), which a chart named
