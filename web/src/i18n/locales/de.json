@@ -1,0 +1,58 @@
+{
+  "common": {
+    "siteName": "Simon Ostendorf",
+    "skipToContent": "Zum Inhalt springen",
+    "switchLocale": "English",
+    "theme": {
+      "light": "Zu hellem Modus wechseln",
+      "dark": "Zu dunklem Modus wechseln",
+      "system": "Systemeinstellung übernehmen"
+    }
+  },
+  "nav": {
+    "main": "Hauptmenü",
+    "home": "Start",
+    "cv": "Lebenslauf",
+    "contact": "Kontakt"
+  },
+  "legal": {
+    "eyebrow": "Rechtliches",
+    "imprint": {
+      "title": "Impressum",
+      "metaDescription": "Impressum von Simon Ostendorf."
+    },
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "metaDescription": "Datenschutzerklärung von Simon Ostendorf."
+    }
+  },
+  "footer": {
+    "copyright": "© {year} Simon Ostendorf"
+  },
+  "home": {
+    "meta": {
+      "title": "Simon Ostendorf",
+      "description": "Die persönliche Seite von Simon Ostendorf, mit Verweisen auf die Entwicklungsarbeit auf ostendorf.dev und die Veranstaltungstechnik auf ostendorf.tech."
+    },
+    "heading": "Simon Ostendorf"
+  },
+  "cv": {
+    "meta": {
+      "title": "Lebenslauf",
+      "description": "Der Lebenslauf von Simon Ostendorf."
+    },
+    "heading": "Lebenslauf"
+  },
+  "contact": {
+    "meta": {
+      "title": "Kontakt",
+      "description": "Kontaktmöglichkeiten für Simon Ostendorf."
+    },
+    "heading": "Kontakt"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "lead": "Diese Seite gibt es nicht.",
+    "backHome": "Zur Startseite"
+  }
+}
