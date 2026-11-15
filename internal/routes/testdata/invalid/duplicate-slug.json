@@ -1,0 +1,4 @@
+[
+  { "name": "home", "slug": "dup", "file": "a.html" },
+  { "name": "other", "slug": "dup", "file": "b.html" }
+]

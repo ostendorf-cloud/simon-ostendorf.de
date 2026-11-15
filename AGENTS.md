@@ -7,34 +7,73 @@ The global baseline already applies here and is not repeated below.
 ## Layout
 
 - `cmd/website` wires the service: config, construction, shutdown. `embed.go` embeds
-  `dist/` (the built SPA, written by `task web:build`). It sits under `cmd/` rather than
-  `internal/` because `go:embed` resolves relative to the file holding the directive.
+  `dist/` (the built SPA, written by `task web:build`) and `prerendered/` (the static HTML
+  per route and locale, written by `task prerender`). Both directories sit under `cmd/`
+  rather than `internal/` because `go:embed` resolves relative to the file holding the
+  directive. `routes_test.go`'s `TestPrerenderedOutputMatchesRouteTable` walks the real
+  `prerendered/` output and checks it against `internal/routes`' own table, catching both a
+  route with no prerendered file and a prerendered file that answers no route; `task
+  test:routes` runs it on its own.
 - `internal/config` loads and validates the website's own environment once, aggregated into
-  one error. There is no secret-shaped variable yet: no session, no OIDC, no CSRF and no form
-  exist in this milestone.
+  one error. `SiteURL` is the base `internal/webapp`'s sitemap and `robots.txt` build every
+  absolute URL from. There is no secret-shaped variable: no session, no OIDC, no CSRF and no
+  form exist in this milestone. Both `simon-ostendorf.de` and `www.simon-ostendorf.de` exist in
+  production, with `www` redirecting to the apex; `SiteURL`'s own default, `.env.example` and
+  the frontend's `web/src/lib/seo.ts` all name the apex as the canonical host, while the
+  chart's `ingress.hosts` default serves both, which is why the two appear in different places.
+- `internal/routes` is the website's one route table: `routes.json`, checked in and embedded
+  through `//go:embed`, lists every page as a name, a slug and the prerendered file that
+  answers it. `internal/webapp`, `web/scripts/prerender.ts`, and the frontend's own
+  `web/src/router/index.ts` and `web/src/lib/seo.ts`, through the shared
+  `web/src/lib/routeTable.ts`, each read this one file to build their own list instead of
+  restating it, so a page added to one side and not the other can no longer happen.
+  `routes.go`'s `Parse` rejects a table with a missing name or file, or a repeated name, slug
+  or file, before any of those five consumers ever sees it; `routeTable.ts`'s own
+  `validateRouteTable` enforces the same three rules for the frontend, which reads
+  `routes.json` through Vite's JSON import rather than through Go. `internal/routes/testdata`
+  holds the fixtures both `routes_test.go` and `routeTable.test.ts` read, so a fixture either
+  side adds is checked by both validators without touching the other test file.
 - `internal/webapp` builds two HTTP handlers from govue's packages. `Handler` is the public
-  one: the embedded SPA bundle behind panic recovery and a request id, nothing more yet.
-  `AdminHandler` is the second, smaller one govue's admin listener serves: health, readiness
-  and metrics, reached only from inside the cluster, never through the chart's own Ingress.
+  one: the SPA's static assets, the prerendered page for every known route and locale,
+  `robots.txt` and `sitemap.xml`, and the catch-all document handler, behind panic recovery
+  and a request id. `pages.go` is that catch-all handler: the locale redirect at `/`,
+  trailing slash canonicalisation, and serving the matching prerendered file or a locale's
+  own 404 page, all built from `internal/routes`' embedded table. `sitemap.go` serves
+  `robots.txt` and `sitemap.xml` from that same table, each `<url>` carrying an hreflang
+  alternate for both locales. `AdminHandler` is the second, smaller handler govue's admin
+  listener serves: health, readiness and metrics, reached only from inside the cluster, never
+  through the chart's own Ingress.
 - `internal/depsync` checks that `go.mod` and `web/package.json` pin the same govue version,
   and that `web/pnpm-lock.yaml` still resolves govue's Vue package to its `/web` subdirectory.
-- `web/` is the Vue SPA, consuming govue's Vue package as a pnpm git dependency. `web/src`
-  holds the one placeholder page this milestone ships. `web/src/theme/simon-ostendorf-de.css`
-  is this site's theme file, filling govue's token contract; see its own comment for why it
-  carries a borrowed, placeholder palette rather than a real brand colour yet.
+- `web/` is the Vue SPA, consuming govue's Vue package as a pnpm git dependency. `web/src/i18n`
+  holds the German and English message catalogues (German is the source of truth; English
+  falls back to German for any key not yet translated) and `web/src/i18n/locales.test.ts`
+  fails the build on a key present in one catalogue and missing from the other.
+  `web/src/router/index.ts` builds one vue-router route per `routes.json` entry, plus the
+  locale redirect and the 404 route. `web/src/lib/seo.ts` resolves each route's title, meta
+  description and hreflang alternates from the same table. `web/src/views` holds this
+  milestone's five page shells (home, cv, contact, imprint, privacy), each a heading and
+  nothing else: a page's actual content is a separate issue, see "Scope of this milestone"
+  below. `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
+  locale switch and the theme toggle. `web/scripts/prerender.ts` is the static site
+  generation step `task prerender` runs, server-rendering every route of every locale into
+  `cmd/website/prerendered`. `web/src/theme/simon-ostendorf-de.css` is this site's theme
+  file, filling govue's token contract; see its own comment for why it carries a borrowed,
+  placeholder palette rather than a real brand colour yet.
 - `charts/simon-ostendorf.de/` is the Helm chart. `charts/simon-ostendorf.de/README.md` covers
   installing and configuring it.
 
 ## A build needs the frontend first
 
-`cmd/website` cannot compile against an empty `dist/` directory, because `go:embed` fails when
-its pattern matches no file at all. `dist/` is gitignored, generated by `task web:build`.
+`cmd/website` cannot compile against an empty `dist/` or `prerendered/` directory, because
+`go:embed` fails when its pattern matches no file at all. `dist/` and `prerendered/` are both
+gitignored, generated by `task web:build` and `task prerender` respectively.
 
 `task build` and `task test:go` both declare that dependency, so running either one through
 Task always populates the frontend first. A bare `go build ./cmd/website` or
 `go test ./cmd/website/...` outside Task fails on a fresh checkout for that reason; run
-`task build` or `task test:go` instead, or `task web:build` once by hand before reaching for
-the Go toolchain directly.
+`task build` or `task test:go` instead, or `task web:build && task prerender` once by hand
+before reaching for the Go toolchain directly.
 
 ## govue's two halves move together
 
@@ -55,15 +94,18 @@ task check
 
 ## Scope of this milestone
 
-Only the scaffold exists so far: the tooling, CI, the Helm chart, the container build, and one
-placeholder page. Nothing below is implemented yet:
+The tooling, CI, the Helm chart, the container build, the bilingual page shell, the one route
+table and its prerendering are in place. Each of the five pages the shell routes to
+(home/about, cv, contact, imprint, privacy) carries a heading and nothing else; the actual
+content is each its own issue and none of it is implemented yet:
 
 - A short page about the person, with two clear ways on: development at ostendorf.dev, event
   technology at ostendorf.tech.
 - The CV as a page, rendered from the data the `cv` repository publishes, with the PDF offered
   for download.
-- Contact.
-- Imprint and privacy. This domain needs its own, unlike ostendorf.tech's.
+- Contact, with a proof of work challenge and SMTP delivery.
+- Server side page view counting with Umami.
+- Imprint and privacy content. This domain needs its own, unlike ostendorf.tech's.
   `old_simon-ostendorf.de` was this domain's previous site, the event technology business
   before it moved to ostendorf.tech, and carried this domain's previous imprint and privacy
   pages; ostendorf.tech has already ported most of that content. Prefer ostendorf.tech's own

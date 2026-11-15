@@ -6,7 +6,7 @@ set:
   httpRoute:
     enabled: true
     hostnames:
-      - www.simon-ostendorf.de
+      - simon-ostendorf.de
     parentRefs:
       name: shared-gateway
       namespace: gateway-system
@@ -63,7 +63,7 @@ tests:
     asserts:
       - equal:
           path: spec.hostnames[0]
-          value: www.simon-ostendorf.de
+          value: simon-ostendorf.de
 
   - it: points its one rule at the chart's own Service and name
     template: templates/httproute.yaml

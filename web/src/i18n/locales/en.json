@@ -1,0 +1,58 @@
+{
+  "common": {
+    "siteName": "Simon Ostendorf",
+    "skipToContent": "Skip to content",
+    "switchLocale": "Deutsch",
+    "theme": {
+      "light": "Switch to light mode",
+      "dark": "Switch to dark mode",
+      "system": "Follow system setting"
+    }
+  },
+  "nav": {
+    "main": "Main menu",
+    "home": "Home",
+    "cv": "CV",
+    "contact": "Contact"
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "imprint": {
+      "title": "Imprint",
+      "metaDescription": "Imprint of Simon Ostendorf."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaDescription": "Privacy policy of Simon Ostendorf."
+    }
+  },
+  "footer": {
+    "copyright": "© {year} Simon Ostendorf"
+  },
+  "home": {
+    "meta": {
+      "title": "Simon Ostendorf",
+      "description": "Simon Ostendorf's personal page, pointing to the development work at ostendorf.dev and the event technology business at ostendorf.tech."
+    },
+    "heading": "Simon Ostendorf"
+  },
+  "cv": {
+    "meta": {
+      "title": "CV",
+      "description": "Simon Ostendorf's curriculum vitae."
+    },
+    "heading": "CV"
+  },
+  "contact": {
+    "meta": {
+      "title": "Contact",
+      "description": "Ways to get in touch with Simon Ostendorf."
+    },
+    "heading": "Contact"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "lead": "This page does not exist.",
+    "backHome": "Back to the home page"
+  }
+}

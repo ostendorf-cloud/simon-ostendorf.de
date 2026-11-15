@@ -66,7 +66,20 @@ ingress:
   enabled: false
   className: ""
   annotations: {}
+  # The apex is this site's canonical host; www.simon-ostendorf.de is a
+  # second, live hostname that redirects to it (see AGENTS.md). Both are
+  # listed here so the Ingress accepts and routes both, each to the same
+  # backend below: this chart stays ingress-controller agnostic and ships
+  # no baked-in redirect annotation, matching className and annotations
+  # above, which are also left for the operator to fill in. An operator
+  # who wants the Ingress itself to answer www with a 301 to the apex,
+  # rather than serving it directly, adds their controller's own
+  # redirect annotation through ingress.annotations.
   hosts:
+    - host: simon-ostendorf.de
+      paths:
+        - path: /
+          pathType: Prefix
     - host: www.simon-ostendorf.de
       paths:
         - path: /

@@ -85,11 +85,28 @@ assert_status "/metrics" "200" "$admin_url"
 # live on the admin listener above.
 assert_status "/metrics" "404"
 
-assert_status "/" "200"
+assert_status "/" "302"
 
-# http.FileServerFS canonicalises any request for /index.html to / with a
-# 301 redirect; that is correct, standard net/http behaviour, not a bug.
-assert_status "/index.html" "301"
+# A visitor with no locale yet lands on one by redirect, never on a page
+# served directly at /: checking the status alone would also pass a
+# redirect to the wrong place, so this checks where / actually sends a
+# visitor, not just that it sends them somewhere.
+location="$(curl --silent --output /dev/null --write-out '%{redirect_url}' "${base_url}/")" || location=""
+if [[ ! $location =~ /(de|en)/$ ]]; then
+  echo "GET ${base_url}/: want redirect to a locale path, got Location \"${location}\"" >&2
+  fail=1
+fi
+
+# Both locales are real pages, not just one with the other silently
+# missing: a site that serves German but not English, or the reverse,
+# has to fail this script.
+assert_status "/de/" "200"
+assert_status "/en/" "200"
+
+# There is no top level index.html any more: every prerendered document
+# lives under its own locale's path, so this is an unknown path like any
+# other and gets that locale's 404 page, same as /de/portfolio/ would.
+assert_status "/index.html" "404"
 
 if [[ $fail -ne 0 ]]; then
   echo "smoke test failed" >&2

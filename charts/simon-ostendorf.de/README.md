@@ -68,7 +68,11 @@ that always renders regardless of which routing flag is set.
 
 Set `ingress.enabled: true`. `ingress.hosts` names the host and path rules, and `ingress.tls`
 carries the certificate configuration directly on the `Ingress` object: this chart owns that
-configuration.
+configuration. `ingress.hosts` defaults to both `simon-ostendorf.de`, the canonical apex, and
+`www.simon-ostendorf.de`, which redirects to it in production; both rules route to the same
+backend, since this chart ships no ingress-controller-specific redirect annotation of its own.
+An operator whose ingress controller should answer `www` with a redirect instead of serving it
+directly adds that controller's own annotation through `ingress.annotations`.
 
 ### Gateway API HTTPRoute
 
@@ -107,6 +111,7 @@ See `values.yaml` for the full, commented list. The ones most deployments touch:
 | `service.port` | Public Service and container port, the only one the `Ingress` ever routes to | `8080` |
 | `service.adminPort` | govue's admin listener: health, readiness and metrics, in-cluster only | `8081` |
 | `ingress.enabled` | Create an `Ingress`. Mutually exclusive with `httpRoute.enabled`; see "External routing" above. | `false` |
+| `ingress.hosts` | Host and path rules for the `Ingress` | the apex and its `www` alias, see "External routing" above |
 | `ingress.annotations` | Annotations for the `Ingress` | `{}` |
 | `ingress.tls` | TLS configuration for the `Ingress` | `[]` |
 | `httpRoute.enabled` | Create a Gateway API `HTTPRoute`. Mutually exclusive with `ingress.enabled`; see "External routing" above. | `false` |

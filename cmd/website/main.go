@@ -1,7 +1,7 @@
-// Command website serves simon-ostendorf.de: the built Vue SPA on its
-// public listener, and the operational endpoints /healthz, /readyz and
-// /metrics on a second, administrative listener, reached only from inside
-// the cluster.
+// Command website serves simon-ostendorf.de: the prerendered HTML and the
+// built Vue SPA on its public listener, and the operational endpoints
+// /healthz, /readyz and /metrics on a second, administrative listener,
+// reached only from inside the cluster.
 package main
 
 import (
@@ -38,8 +38,12 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("website: %w", err)
 	}
+	prerendered, err := fs.Sub(prerenderedFS, "prerendered")
+	if err != nil {
+		return fmt.Errorf("website: %w", err)
+	}
 
-	app, err := webapp.New(cfg, logger, dist)
+	app, err := webapp.New(cfg, logger, dist, prerendered)
 	if err != nil {
 		return err
 	}
