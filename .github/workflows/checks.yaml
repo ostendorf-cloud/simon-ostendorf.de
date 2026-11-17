@@ -186,4 +186,4 @@ jobs:
       - run: task test:helm
 
   renovate-config:
-    uses: ostendorf-cloud/workflows/.github/workflows/reusable-renovate-config.yaml@91979cf4cff86d00ebee28dfaf6e3b452aaeb1a9  # v0.2.2
+    uses: ostendorf-cloud/workflows/.github/workflows/reusable-renovate-config.yaml@v0
