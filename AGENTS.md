@@ -118,10 +118,6 @@ content is each its own issue and none of it is implemented yet:
   Ostendorf's own personal domain, and reusing it would misidentify the source of a service.
   No per-file licence header and no reusable license-header workflow for the same reason; the
   single `LICENSE` carries it. `NOTICE` records what `LICENSE` does not cover.
-- `.github/workflows/dco.yaml`, `renovate.yaml` and `checks.yaml`'s `renovate-config` job call
-  `ostendorf-cloud/workflows`'s reusable workflows at the exact tag `v0.2.2`, the newest tag
-  that exists, not a floating `v0` major tag: `ostendorf-cloud/workflows` has not cut one yet.
-  Repoint at `v0` once it exists.
 - The Helm chart lives at `charts/simon-ostendorf.de/`, matching the repository's own name, but
   its `Chart.yaml` `name` and every rendered object name use `simon-ostendorf-de` instead: a
   literal dot is invalid in a `Service`'s `metadata.name` (RFC 1035 label), which a chart named
