@@ -2,7 +2,7 @@ name: renovate
 
 on:
   schedule:
-    - cron: "26 4 * * *"
+    - cron: "23 * * * *"
   workflow_dispatch:
   issues:
     types: [edited]
