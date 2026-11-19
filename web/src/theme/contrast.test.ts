@@ -14,6 +14,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import { THEME_NAME } from '../lib/theme'
+
 const TEXT_MINIMUM = 4.5
 const NON_TEXT_MINIMUM = 3
 
@@ -116,6 +118,12 @@ const css = readFileSync(themePath, 'utf-8')
 const { light, dark } = tokens(css)
 
 describe('the simon-ostendorf-de theme', () => {
+  it('is the theme the site sets on the root element', () => {
+    expect(css).toContain(`:root[data-theme='${THEME_NAME}']`)
+    const seeds = JSON.parse(readFileSync(join(process.cwd(), 'src/theme/seeds.json'), 'utf-8'))
+    expect(seeds.name).toBe(THEME_NAME)
+  })
+
   it('declares every text pair at 4.5:1 in light mode', () => {
     expect(failures(light, TEXT_PAIRS, TEXT_MINIMUM)).toEqual([])
   })

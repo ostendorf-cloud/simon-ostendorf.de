@@ -8,6 +8,7 @@
     "build": "vite build",
     "prerender": "vite build --ssr scripts/prerender.ts --outDir .prerender-ssr --emptyOutDir && node .prerender-ssr/prerender.js && rm -rf .prerender-ssr && pnpm run check:legal",
     "check:legal": "govue-check-legal --dir ../cmd/website/prerendered",
+    "theme:generate": "node node_modules/@ostendorf-cloud/govue/scripts/generate-theme.ts --config src/theme/seeds.json --out src/theme/simon-ostendorf-de.css",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

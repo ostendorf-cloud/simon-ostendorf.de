@@ -2,10 +2,9 @@
  * Which theme this site ships, read from here by the two sides that have
  * to agree on it: src/main.ts hands it to useTheme, and
  * web/scripts/prerender.ts writes the same value into every page's
- * data-theme attribute. This site ships exactly one theme, the
- * placeholder palette AGENTS.md describes; see
- * src/theme/simon-ostendorf-de.css for why it is a placeholder rather than
- * a real brand colour.
+ * data-theme attribute. This site ships exactly one theme, generated from
+ * the two seed colours in src/theme/seeds.json (a navy accent on a warm
+ * grey base) into src/theme/simon-ostendorf-de.css.
  *
  * The mode is left at useTheme's own default, "system": unlike
  * ostendorf.tech this site has no reason to open dark by default, so
