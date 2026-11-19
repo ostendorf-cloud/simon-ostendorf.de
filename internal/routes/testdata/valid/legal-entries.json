@@ -1,0 +1,5 @@
+[
+  { "name": "home", "slug": "", "file": "index.html" },
+  { "name": "imprint", "slug": "imprint", "file": "imprint/index.html", "legal": true },
+  { "name": "privacy", "slug": "privacy", "file": "privacy/index.html", "legal": true }
+]

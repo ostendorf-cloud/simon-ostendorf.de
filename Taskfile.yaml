@@ -117,6 +117,14 @@ tasks:
     cmds:
       - go test -race -count=1 -run TestPrerenderedOutputMatchesRouteTable ./cmd/website/...
 
+  # "task prerender" already ends with this check, so no build ships without it. This
+  # target is the one CI's legal job runs: prerendering is the check, with its inputs.
+  # It is not in "check", which runs prerender already.
+  check:legal:
+    desc: Prerender, which ends with govue-check-legal over the legal pages and their footer links
+    cmds:
+      - task: prerender
+
   web:deps:
     desc: Install the web/ dependencies
     dir: web

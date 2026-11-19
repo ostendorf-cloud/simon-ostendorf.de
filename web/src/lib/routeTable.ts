@@ -7,6 +7,26 @@ export interface RouteEntry {
   name: string
   slug: string
   file: string
+  /** One of govue's legal pages: canonical path /<locale>/<slug>, no
+   *  trailing slash. Mirrors Route.Legal in routes.go. */
+  legal?: boolean
+}
+
+/** LEGAL_SLUGS mirrors routes.LegalSlugs in routes.go. */
+export const LEGAL_SLUGS: readonly string[] = ['imprint', 'privacy', 'terms']
+
+/**
+ * pagePath is the canonical path of a page in locale, the one rule the
+ * canonical and hreflang URLs, the sitemap and the router share with the
+ * server (internal/webapp's routePattern and routeURL): a trailing slash,
+ * except for a legal page, whose path is govue's /<locale>/<page>. The home
+ * page and the 404 page have an empty slug and give /<locale>/.
+ */
+export function pagePath(locale: string, slug: string, legal = false): string {
+  if (slug === '') {
+    return `/${locale}/`
+  }
+  return legal ? `/${locale}/${slug}` : `/${locale}/${slug}/`
 }
 
 /**
@@ -49,6 +69,9 @@ export function validateRouteTable(table: readonly RouteEntry[]): void {
     }
     if (entry.file === '') {
       throw new Error(`routeTable: route "${entry.name}" has no file`)
+    }
+    if (entry.legal && !LEGAL_SLUGS.includes(entry.slug)) {
+      throw new Error(`routeTable: legal route "${entry.name}" has slug "${entry.slug}"`)
     }
     if (names.has(entry.name)) {
       throw new Error(`routeTable: duplicate name "${entry.name}"`)

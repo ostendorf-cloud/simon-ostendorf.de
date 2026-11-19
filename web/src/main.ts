@@ -3,7 +3,7 @@ import { createWebHistory } from 'vue-router'
 import { useTheme } from '@ostendorf-cloud/govue'
 
 import App from './App.vue'
-import { createAppI18n, detectPreferredLocale, isLocale } from './i18n'
+import { createAppI18n, detectPreferredLocale, installI18n, isLocale } from './i18n'
 import { THEME_NAME } from './lib/theme'
 import { attachLocaleSync, createAppRouter } from './router'
 import './styles.css'
@@ -25,7 +25,7 @@ attachLocaleSync(router, i18n.global.locale)
 
 const app = createSSRApp(App)
 app.use(router)
-app.use(i18n)
+installI18n(app, i18n)
 
 // router.isReady() resolves after the initial navigation, including the
 // async route components above, which is what the hydration this app

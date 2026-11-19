@@ -1,4 +1,6 @@
+import type { App } from 'vue'
 import { createI18n } from 'vue-i18n'
+import { createGovueI18n } from '@ostendorf-cloud/govue'
 
 import de from './locales/de.json'
 import en from './locales/en.json'
@@ -22,6 +24,26 @@ export function isLocale(value: string): value is Locale {
 export function detectPreferredLocale(languages: readonly string[]): Locale {
   const primary = languages[0]?.split('-')[0]?.toLowerCase()
   return primary === 'en' ? 'en' : DEFAULT_LOCALE
+}
+
+/**
+ * installI18n installs the app's own vue-i18n instance and govue's language
+ * layer on top of it. The layer merges govue's catalogues (the legal page
+ * titles, the footer link labels, the back link) into the same instance and
+ * follows its locale, which the router keeps in step with the URL. Nothing is
+ * detected and nothing is stored: storage is off, so the layer writes no
+ * cookie and no localStorage entry, and the locale stays the URL's.
+ */
+export function installI18n(app: App, i18n: ReturnType<typeof createAppI18n>): void {
+  app.use(i18n)
+  app.use(
+    createGovueI18n({
+      i18n,
+      locale: i18n.global.locale.value,
+      detect: false,
+      storage: { kind: 'none' },
+    }),
+  )
 }
 
 /**

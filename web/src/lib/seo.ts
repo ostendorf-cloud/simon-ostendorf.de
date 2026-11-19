@@ -1,6 +1,6 @@
 import type { Locale } from '../i18n'
 import { SUPPORTED_LOCALES } from '../i18n'
-import { routeTable } from './routeTable'
+import { pagePath, routeTable } from './routeTable'
 
 /** The site's canonical origin. Overridable through VITE_SITE_URL for a
  *  staging build; the default matches the Go service's own default
@@ -31,10 +31,12 @@ const slugs: Record<string, string> = Object.fromEntries(
 )
 slugs[NOT_FOUND] = ''
 
-/** path is the absolute path of route in locale, always starting and
- *  ending with a slash. */
+const legalRoutes = new Set(routeTable.filter((entry) => entry.legal).map((entry) => entry.name))
+
+/** path is the absolute path of route in locale, the exact path the server
+ *  answers with 200: see pagePath. */
 export function path(locale: Locale, route: PageRoute): string {
-  return `/${locale}/${slugs[route]}`
+  return pagePath(locale, slugs[route], legalRoutes.has(route))
 }
 
 /** canonical is the absolute URL of route in locale. */

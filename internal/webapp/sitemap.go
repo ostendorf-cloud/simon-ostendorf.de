@@ -65,5 +65,8 @@ func routeURL(base, locale, slug string) string {
 	if slug == "" {
 		return base + "/" + locale + "/"
 	}
+	if legalSlugs[slug] {
+		return base + "/" + locale + "/" + slug
+	}
 	return base + "/" + locale + "/" + slug + "/"
 }

@@ -29,6 +29,7 @@ import (
 	"github.com/ostendorf-cloud/govue/analytics"
 	"github.com/ostendorf-cloud/govue/clientip"
 	"github.com/ostendorf-cloud/govue/health"
+	"github.com/ostendorf-cloud/govue/language"
 	"github.com/ostendorf-cloud/govue/metrics"
 	"github.com/ostendorf-cloud/govue/middleware"
 
@@ -65,6 +66,12 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 		return nil, err
 	}
 
+	// Handler registers the legal redirects and cannot return an error, so a
+	// bad legalConfig is reported here, once, on a mux of its own.
+	if err := language.HandleLegal(http.NewServeMux(), legalConfig, nil); err != nil {
+		return nil, fmt.Errorf("webapp: %w", err)
+	}
+
 	registry := metrics.NewRegistry()
 
 	// Page view counting. The resolver trusts X-Forwarded-For only from the
@@ -99,6 +106,10 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 		metricsHandler: metrics.Handler(registry),
 	}, nil
 }
+
+// legalConfig is the legal redirect set: German and English, German default,
+// no terms.
+var legalConfig = language.LegalConfig{Config: language.Config{Languages: locales, Default: defaultLocale}}
 
 // analyticsCloseTimeout bounds how long Close waits for the queued page
 // views to be posted.
@@ -141,6 +152,14 @@ func (a *App) Handler() http.Handler {
 	mux.Handle("GET /robots.txt", a.robotsHandler())
 	mux.Handle("GET /sitemap.xml", a.sitemapHandler())
 	registerRoutes(mux, a.pages, func(h http.Handler) http.Handler { return h })
+	// govue's legal redirects: /imprint, /privacy and the German aliases
+	// /impressum, /datenschutz and /datenschutzerklaerung. They answer 302,
+	// which analytics never counts. This site has no terms, so /terms and
+	// /agb stay unregistered and fall to the 404 below. The catch-all must be
+	// method-less, see language.HandleLegal.
+	if err := language.HandleLegal(mux, legalConfig, nil); err != nil {
+		panic("webapp: legal routes: " + err.Error())
+	}
 	mux.Handle("/", a.pages.pageHandler())
 
 	// Analytics is innermost, directly around the mux: it reads the route

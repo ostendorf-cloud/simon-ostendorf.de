@@ -14,6 +14,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 //go:embed routes.json
@@ -32,7 +33,17 @@ type Route struct {
 	// File is the prerendered file that answers Slug, relative to one
 	// locale's own directory under cmd/website/prerendered.
 	File string `json:"file"`
+	// Legal marks one of govue's legal pages. Its canonical path is
+	// /<locale>/<slug> with no trailing slash, the exact path govue's footer
+	// links, its language.HandleLegal redirects target and govue-check-legal
+	// requires. Every other route keeps the trailing slash. A legal route's
+	// Slug must be one of LegalSlugs.
+	Legal bool `json:"legal,omitempty"`
 }
+
+// LegalSlugs are the slugs of govue's legal pages, the only ones a Route may
+// mark Legal. They are the targets of language.HandleLegal's redirects.
+var LegalSlugs = []string{"imprint", "privacy", "terms"}
 
 // Load parses the embedded route table.
 func Load() ([]Route, error) {
@@ -59,6 +70,9 @@ func Load() ([]Route, error) {
 //     convention. An empty slug is rejected only once a second entry
 //     repeats it, exactly like any other duplicate value; emptiness
 //     itself is not the problem.
+//   - A legal entry's slug must be one of LegalSlugs: its canonical path
+//     is the one language.HandleLegal redirects to, so any other slug
+//     would be a redirect to a page that does not exist.
 //
 // A caller that only ever parses the checked-in routes.json should treat a
 // failure here as a build bug, not a runtime one.
@@ -84,6 +98,9 @@ func Parse(data []byte) ([]Route, error) {
 		}
 		if r.File == "" {
 			return nil, fmt.Errorf("routes: route table: route %q has no file", r.Name)
+		}
+		if r.Legal && !slices.Contains(LegalSlugs, r.Slug) {
+			return nil, fmt.Errorf("routes: route table: route %q is legal but its slug %q is none of %v", r.Name, r.Slug, LegalSlugs)
 		}
 		if names[r.Name] {
 			return nil, fmt.Errorf("routes: route table: duplicate name %q", r.Name)

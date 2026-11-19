@@ -63,13 +63,13 @@ func TestPageHandlerServesKnownRoutes(t *testing.T) {
 		"german home":     {"/de/", http.StatusOK, "Startseite", "GET /de/{$}"},
 		"german cv":       {"/de/cv/", http.StatusOK, "Lebenslauf", "GET /de/cv/{$}"},
 		"german contact":  {"/de/contact/", http.StatusOK, "Kontakt", "GET /de/contact/{$}"},
-		"german imprint":  {"/de/imprint/", http.StatusOK, "Impressum", "GET /de/imprint/{$}"},
-		"german privacy":  {"/de/privacy/", http.StatusOK, "Datenschutz", "GET /de/privacy/{$}"},
+		"german imprint":  {"/de/imprint", http.StatusOK, "Impressum", "GET /de/imprint"},
+		"german privacy":  {"/de/privacy", http.StatusOK, "Datenschutz", "GET /de/privacy"},
 		"english home":    {"/en/", http.StatusOK, "Home", "GET /en/{$}"},
 		"english cv":      {"/en/cv/", http.StatusOK, "CV", "GET /en/cv/{$}"},
 		"english contact": {"/en/contact/", http.StatusOK, "Contact", "GET /en/contact/{$}"},
-		"english imprint": {"/en/imprint/", http.StatusOK, "Imprint", "GET /en/imprint/{$}"},
-		"english privacy": {"/en/privacy/", http.StatusOK, "Privacy", "GET /en/privacy/{$}"},
+		"english imprint": {"/en/imprint", http.StatusOK, "Imprint", "GET /en/imprint"},
+		"english privacy": {"/en/privacy", http.StatusOK, "Privacy", "GET /en/privacy"},
 	}
 
 	for name, tc := range tests {
@@ -159,29 +159,29 @@ func TestPageHandlerRedirectsRoot(t *testing.T) {
 
 func TestPageHandlerCanonicalizesTrailingSlash(t *testing.T) {
 	p := testPageServer(t)
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/de/imprint", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/de/cv", nil)
 	rec := httptest.NewRecorder()
 	p.pageHandler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusMovedPermanently {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusMovedPermanently)
 	}
-	if got := rec.Header().Get("Location"); got != "/de/imprint/" {
-		t.Errorf("Location = %q, want /de/imprint/", got)
+	if got := rec.Header().Get("Location"); got != "/de/cv/" {
+		t.Errorf("Location = %q, want /de/cv/", got)
 	}
 }
 
 func TestPageHandlerCanonicalizesTrailingSlashPreservesQuery(t *testing.T) {
 	p := testPageServer(t)
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/de/imprint?utm_source=x", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/de/cv?utm_source=x", nil)
 	rec := httptest.NewRecorder()
 	p.pageHandler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusMovedPermanently {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusMovedPermanently)
 	}
-	if got := rec.Header().Get("Location"); got != "/de/imprint/?utm_source=x" {
-		t.Errorf("Location = %q, want /de/imprint/?utm_source=x", got)
+	if got := rec.Header().Get("Location"); got != "/de/cv/?utm_source=x" {
+		t.Errorf("Location = %q, want /de/cv/?utm_source=x", got)
 	}
 }
 

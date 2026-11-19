@@ -2,6 +2,6 @@
   { "name": "home", "slug": "", "file": "index.html" },
   { "name": "cv", "slug": "cv", "file": "cv/index.html" },
   { "name": "contact", "slug": "contact", "file": "contact/index.html" },
-  { "name": "imprint", "slug": "imprint", "file": "imprint/index.html" },
-  { "name": "privacy", "slug": "privacy", "file": "privacy/index.html" }
+  { "name": "imprint", "slug": "imprint", "file": "imprint/index.html", "legal": true },
+  { "name": "privacy", "slug": "privacy", "file": "privacy/index.html", "legal": true }
 ]

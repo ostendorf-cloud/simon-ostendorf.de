@@ -56,8 +56,17 @@ describe('descriptionKeys', () => {
 })
 
 describe('path and canonical', () => {
-  it.each(routeTable)('resolves routes.json entry $name to its own slug', (entry) => {
-    expect(path('de', entry.name)).toBe(`/de/${entry.slug}`)
+  // The path must be the one the server answers with 200 and the sitemap
+  // lists: a trailing slash, none for a legal page. Anything else is a 301.
+  it.each(routeTable)('resolves routes.json entry $name to its served path', (entry) => {
+    const want =
+      entry.slug === '' ? '/de/' : entry.legal ? `/de/${entry.slug}` : `/de/${entry.slug}/`
+    expect(path('de', entry.name)).toBe(want)
+  })
+
+  it('gives cv a trailing slash and the imprint none', () => {
+    expect(canonical('en', 'cv')).toBe('https://simon-ostendorf.de/en/cv/')
+    expect(canonical('en', 'imprint')).toBe('https://simon-ostendorf.de/en/imprint')
   })
 
   it.each(routeTable)(
