@@ -92,19 +92,68 @@ describe.each(locales)('the %s privacy page', (locale) => {
   })
 
   it('states the access log fields and the separate ingress log', () => {
-    const text = page().textContent ?? ''
+    const section = [...page().querySelectorAll('h3')]
+      .find((h) => (h.textContent ?? '').trim().startsWith('2.1'))
+      ?.closest('div')
+    expect(section).toBeTruthy()
+    const norm = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').trim()
+    const items = [...(section?.querySelectorAll('ul li') ?? [])].map((li) => norm(li.textContent))
+    const paragraphs = [...(section?.querySelectorAll('p') ?? [])].map((p) => norm(p.textContent))
+    const ingress = paragraphs.find((p) =>
+      p.includes(locale === 'de' ? 'Ingress des Clusters' : "cluster's ingress"),
+    )
+    expect(ingress).toBeTruthy()
+
     if (locale === 'de') {
-      expect(text).toContain('Zugriffsprotokoll')
-      expect(text).toContain('Routenmuster')
-      expect(text).toContain('Ingress des Clusters')
-      expect(text).toContain('Anfragezeile mit Pfad und Parametern')
-      expect(text).toContain('der User-Agent, der Referrer und der aufgerufene Pfad')
+      expect(items).toEqual([
+        'den Zeitpunkt der Anfrage',
+        'die Anfragemethode',
+        'die aufgerufene Seite als Routenmuster, nie den Pfad oder die Parameter',
+        'den HTTP-Statuscode und die Menge der übertragenen Daten',
+        'die Dauer der Bearbeitung',
+        'Ihre IP-Adresse, die ungekürzt protokolliert wird; hinter dem vorgeschalteten Ingress ist es die Adresse, die dieser als Ihre meldet',
+        'eine zufällige Anfragekennung',
+      ])
+      expect(paragraphs[0]).toContain('Zugriffsprotokoll')
+      for (const field of [
+        'Ihre IP-Adresse',
+        'Datum und Uhrzeit',
+        'die Anfragezeile mit Pfad und Parametern',
+        'den HTTP-Statuscode, die übertragene Datenmenge',
+        'den Referrer',
+        'den User-Agent',
+      ]) {
+        expect(ingress).toContain(field)
+      }
+      expect(items.join(' ')).not.toMatch(/User-Agent|Referrer/)
+      expect(paragraphs[1]).toContain(
+        'Nicht protokolliert werden der User-Agent, der Referrer und der aufgerufene Pfad',
+      )
     } else {
-      expect(text).toContain('access log')
-      expect(text).toContain('route pattern')
-      expect(text).toContain("cluster's ingress")
-      expect(text).toContain('request line with path and parameters')
-      expect(text).toContain('The user agent, the referrer and the requested path')
+      expect(items).toEqual([
+        'the time of the request',
+        'the request method',
+        'the page as a route pattern, never the path or the parameters',
+        'the HTTP status code and the amount of data transferred',
+        'the duration of the request',
+        'your IP address, logged in full; behind the ingress in front of the application it is the address the ingress reports as yours',
+        'a random request identifier',
+      ])
+      expect(paragraphs[0]).toContain('access log')
+      for (const field of [
+        'your IP address',
+        'the date and time',
+        'the request line with path and parameters',
+        'the HTTP status code, the amount of data transferred',
+        'the referrer',
+        'the user agent',
+      ]) {
+        expect(ingress).toContain(field)
+      }
+      expect(items.join(' ')).not.toMatch(/user agent|referrer/i)
+      expect(paragraphs[1]).toContain(
+        'The user agent, the referrer and the requested path with its parameters are not logged',
+      )
     }
   })
 
@@ -120,24 +169,26 @@ describe.each(locales)('the %s privacy page', (locale) => {
     const sentences =
       locale === 'de'
         ? [
-            'Die Protokolle dienen dem sicheren und stabilen Betrieb der Website, der Analyse von Fehlern und der Abwehr von Missbrauch.',
-            'Die Zählung der Seitenaufrufe dient dazu, zu verstehen, wie die Website genutzt wird',
-            'Ich habe dieses Interesse gegen Ihre Rechte und Freiheiten abgewogen und halte die Daten knapp.',
+            'Für beide Protokolle ist die Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO. Mein berechtigtes Interesse ist der sichere Betrieb der Website, die Analyse von Fehlern und die Abwehr von Missbrauch. Ich habe dieses Interesse gegen Ihre Rechte abgewogen und halte die Daten gering.',
+            'Für die Zählung der Seitenaufrufe ist die Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO. Mein berechtigtes Interesse ist, zu verstehen, wie die Website genutzt wird. Ich habe dieses Interesse gegen Ihre Rechte abgewogen und halte die Daten gering.',
           ]
         : [
-            'The logs serve the secure and stable operation of the website, the analysis of errors and the defence against abuse.',
-            'Counting page views serves to understand how the website is used',
-            'I have weighed this interest against your rights and freedoms and keep the data to a minimum.',
+            'For both logs the legal basis is Art. 6(1)(f) GDPR. My legitimate interest is the secure operation of the website, the analysis of errors and the defence against abuse. I weighed this interest against your rights and keep the data minimal.',
+            'For counting page views the legal basis is Art. 6(1)(f) GDPR. My legitimate interest is to understand how the website is used. I weighed this interest against your rights and keep the data minimal.',
           ]
     for (const sentence of sentences) {
-      expect(text).toContain(sentence)
+      expect(text.replace(/\s+/g, ' ')).toContain(sentence)
     }
+    expect(text).toContain(
+      locale === 'de' ? 'Die Kennung wechselt jeden Monat.' : 'The identifier changes every month.',
+    )
+    expect(text).not.toMatch(/deshalb jeden Monat|therefore changes/)
   })
 
   it('uses the pseudonymous wording and has a right to object paragraph', () => {
     const text = page().textContent ?? ''
     expect(text).not.toMatch(/anonym/i)
-    expect(text).toContain(locale === 'de' ? 'pseudonymen Messung' : 'pseudonymous measurement')
+    expect(text).toContain(locale === 'de' ? 'pseudonyme Kennung' : 'pseudonymous identifier')
     expect(text).not.toMatch(
       /Datenschutzbeauftragte|data protection officer|Empfänger|recipient|Cloudflare|Let's Encrypt|Drittland|third countr/i,
     )

@@ -78,8 +78,8 @@ response: views go through a bounded queue and are dropped when it is full, coun
 ## Access log
 
 The application writes one structured line per request through govue's `middleware.AccessLog`:
-method, route pattern (never the raw path or query), status, bytes, duration, the client address
-and the request id. The client address is resolved through `TRUSTED_PROXIES`, so behind an
+time, method, route pattern (never the raw path or query), status, bytes, duration, the client
+address and the request id. The client address is resolved through `TRUSTED_PROXIES`, so behind an
 ingress it is the visitor and not the proxy. No user agent and no referrer are logged. The
 health routes of the admin listener are not on this handler. The privacy page (2.1) states
 these fields, and separately the cluster ingress log, which is outside this repository. Both

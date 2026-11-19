@@ -74,7 +74,7 @@
   stores (no cookie, the theme choice in local storage), the server side page view counting
   from the README's section "Page view counting", contact by e-mail or phone, the rights of
   data subjects and the right to complain. Section 2.1 names the application's access log
-  (method, route pattern, status, bytes, duration, the client address resolved behind the
+  (time, method, route pattern, status, bytes, duration, the client address resolved behind the
   trusted proxies, request id; no user agent, no referrer, never the path or query) and the
   cluster ingress log as a separate log (address, time, request line with path and query,
   status, bytes, referrer, user agent: the owner's facts, taken from the previous site's

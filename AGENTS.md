@@ -39,17 +39,17 @@ The global baseline already applies here and is not repeated below.
   a request id and govue's access log (`middleware.AccessLog`: one line per request with the
   route pattern, the client address resolved through `TRUSTED_PROXIES`, no user agent; the
   privacy text 2.1 names exactly these fields, change both together). The chain is `Recover`,
-  `RequestID`, the access log, then analytics, which stays innermost around the mux because it
-  and the access log read the route pattern the mux sets. `pages.go` is that catch-all
+  `RequestID`, the access log, then govue's `analytics` middleware, which counts page views
+  on the server (see the README's "Page view counting"). Analytics stays innermost, directly
+  around the mux: it and the access log read the route pattern the mux sets, and `RequestID`
+  replaces the request, so nothing may sit between analytics and the mux. `pages.go` is that
+  catch-all
   handler: the locale redirect at `/`, trailing slash canonicalisation, and serving the
   matching prerendered file or a locale's own 404 page, all built from `internal/routes`'
   embedded table. `sitemap.go` serves `robots.txt` and `sitemap.xml` from that same table,
-  each `<url>` carrying an hreflang alternate for both locales. Page views are counted on the
-  server by govue's `analytics` middleware, innermost around the mux: it reads the route
-  pattern, and `RequestID` replaces the request, so nothing may sit between it and the mux.
-  See the README's "Page view counting". `AdminHandler` is the second, smaller handler govue's
-  admin listener serves: health, readiness and metrics, reached only from inside the cluster,
-  never through the chart's own Ingress.
+  each `<url>` carrying an hreflang alternate for both locales. `AdminHandler` is the
+  second, smaller handler govue's admin listener serves: health, readiness and metrics,
+  reached only from inside the cluster, never through the chart's own Ingress.
 - The legal pages follow govue's scheme. `routes.json` marks the imprint and the privacy page
   `"legal": true`: their canonical path is `/<locale>/<page>` with no trailing slash (every
   other page keeps it), served by an exact pattern, with the slash form redirecting to it. The

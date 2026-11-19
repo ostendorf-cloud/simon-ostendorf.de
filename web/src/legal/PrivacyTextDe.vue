@@ -43,6 +43,7 @@ import { OPERATOR } from './operator'
           einer Zeile je Anfrage. Die Zeile enthält:
         </p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
+          <li>den Zeitpunkt der Anfrage</li>
           <li>die Anfragemethode</li>
           <li>die aufgerufene Seite als Routenmuster, nie den Pfad oder die Parameter</li>
           <li>den HTTP-Statuscode und die Menge der übertragenen Daten</li>
@@ -111,8 +112,8 @@ import { OPERATOR } from './operator'
         <p>
           Umami leitet aus der gekürzten IP-Adresse Land, Region und Stadt ab. Aus gekürzter
           IP-Adresse, User-Agent, einem geheimen Schlüssel und dem laufenden Monat bildet Umami eine
-          pseudonyme Kennung, um die Seitenaufrufe eines Besuchs zusammenzufassen; die Kennung
-          wechselt deshalb jeden Monat. Die vollständige IP-Adresse erhält Umami nicht, und den
+          pseudonyme Kennung, um die Seitenaufrufe eines Besuchs zusammenzufassen. Die Kennung
+          wechselt jeden Monat. Die vollständige IP-Adresse erhält Umami nicht, und den
           vollständigen User-Agent speichert Umami nicht, sondern nur die daraus abgeleiteten
           Angaben (Land, Region, Stadt, Browser, Betriebssystem) zusammen mit der pseudonymen
           Kennung. Eine Zusammenführung mit anderen Daten oder eine Identifizierung einzelner
@@ -154,20 +155,15 @@ import { OPERATOR } from './operator'
           gelöscht.
         </p>
         <p>
-          Die Rechtsgrundlage für beide Protokolle und für die Zählung der Seitenaufrufe ist Art. 6
-          Abs. 1 lit. f DSGVO.
+          Für beide Protokolle ist die Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO. Mein berechtigtes
+          Interesse ist der sichere Betrieb der Website, die Analyse von Fehlern und die Abwehr von
+          Missbrauch. Ich habe dieses Interesse gegen Ihre Rechte abgewogen und halte die Daten
+          gering.
         </p>
         <p>
-          Die Protokolle dienen dem sicheren und stabilen Betrieb der Website, der Analyse von
-          Fehlern und der Abwehr von Missbrauch.
-        </p>
-        <p>
-          Die Zählung der Seitenaufrufe dient dazu, zu verstehen, wie die Website genutzt wird, in
-          einer pseudonymen Messung ihrer Reichweite.
-        </p>
-        <p>
-          Ich habe dieses Interesse gegen Ihre Rechte und Freiheiten abgewogen und halte die Daten
-          knapp.
+          Für die Zählung der Seitenaufrufe ist die Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO. Mein
+          berechtigtes Interesse ist, zu verstehen, wie die Website genutzt wird. Ich habe dieses
+          Interesse gegen Ihre Rechte abgewogen und halte die Daten gering.
         </p>
       </div>
 

@@ -47,6 +47,7 @@ import { OPERATOR } from './operator'
           per request. The line contains:
         </p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
+          <li>the time of the request</li>
           <li>the request method</li>
           <li>the page as a route pattern, never the path or the parameters</li>
           <li>the HTTP status code and the amount of data transferred</li>
@@ -113,10 +114,10 @@ import { OPERATOR } from './operator'
         <p>
           Umami derives country, region and city from the shortened IP address. From the shortened
           IP address, the user agent, a secret key and the current month, Umami forms a pseudonymous
-          identifier to group together the page views of one visit; the identifier therefore changes
-          every month. Umami does not receive the full IP address and does not store the full user
-          agent, only the information derived from them (country, region, city, browser, operating
-          system) together with the pseudonymous identifier. No merging with other data, and no
+          identifier to group together the page views of one visit. The identifier changes every
+          month. Umami does not receive the full IP address and does not store the full user agent,
+          only the information derived from them (country, region, city, browser, operating system)
+          together with the pseudonymous identifier. No merging with other data, and no
           identification of individual visitors, takes place. The application's access log (2.1) and
           the ingress log are separate from this.
         </p>
@@ -150,18 +151,15 @@ import { OPERATOR } from './operator'
           The application's access log and the log of the ingress in front of it are each deleted
           after 30 days. The statistics data in Umami is deleted after 14 months.
         </p>
-        <p>The legal basis for both logs and for counting page views is Art. 6(1)(f) GDPR.</p>
         <p>
-          The logs serve the secure and stable operation of the website, the analysis of errors and
-          the defence against abuse.
+          For both logs the legal basis is Art. 6(1)(f) GDPR. My legitimate interest is the secure
+          operation of the website, the analysis of errors and the defence against abuse. I weighed
+          this interest against your rights and keep the data minimal.
         </p>
         <p>
-          Counting page views serves to understand how the website is used, in a pseudonymous
-          measurement of its reach.
-        </p>
-        <p>
-          I have weighed this interest against your rights and freedoms and keep the data to a
-          minimum.
+          For counting page views the legal basis is Art. 6(1)(f) GDPR. My legitimate interest is to
+          understand how the website is used. I weighed this interest against your rights and keep
+          the data minimal.
         </p>
       </div>
 
