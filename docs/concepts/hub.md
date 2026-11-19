@@ -74,8 +74,10 @@
   What does not carry over: the VAT ID and Kleinunternehmer-specific wording (this is not a
   registered business on this domain), the Streitbeilegungsverfahren/VSBG dispute resolution
   clause either version carried (ostendorf.tech dropped it; this page should not reintroduce
-  it), and the Umami- and Instagram-specific sections, which only apply if this site actually
-  runs that processing.
+  it), and the Instagram-specific section, which only applies if this site actually runs that
+  processing. The Umami section does apply: the owner decided that all sites count page views
+  on the server through govue's Umami module, off until configured. The privacy page states
+  what is counted from the README's section "Page view counting".
 - Runs on the existing govue scaffold: the public `Handler` serves the five pages and the
   contact endpoint, govue's admin listener keeps health, readiness and metrics internal, and
   the Helm chart already in this repository ships it.
@@ -112,8 +114,6 @@
 - One locale or two. ostendorf.tech runs German and English through a shared route table;
   this site currently has no router or i18n setup at all. Owner: decide before the route
   table and prerender step are built.
-- Will this site run visitor analytics (Umami or otherwise). Owner: decide before the privacy
-  page is written, since its content depends on the answer.
 - What address the imprint and privacy pages disclose as the responsible party's address.
   A private individual's residential address raises different privacy considerations than a
   business premises, which is itself why the cv data model keeps the postal address entry

@@ -96,6 +96,66 @@ func TestLoadOverridesEachVariable(t *testing.T) {
 	}
 }
 
+func TestLoadUmamiAndProxies(t *testing.T) {
+	t.Parallel()
+
+	const id = "123e4567-e89b-42d3-a456-426614174000"
+
+	t.Run("off by default", func(t *testing.T) {
+		t.Parallel()
+		cfg, err := Load(env(nil))
+		if err != nil {
+			t.Fatalf("Load() error = %v", err)
+		}
+		if cfg.Umami.Enabled() {
+			t.Error("Umami enabled with nothing set")
+		}
+		if len(cfg.TrustedProxies) != 0 {
+			t.Errorf("TrustedProxies = %v, want none", cfg.TrustedProxies)
+		}
+	})
+
+	t.Run("both set", func(t *testing.T) {
+		t.Parallel()
+		cfg, err := Load(env(map[string]string{
+			"UMAMI_URL": "https://umami.example.test", "UMAMI_WEBSITE_ID": id,
+			"TRUSTED_PROXIES": "10.0.0.0/8, 192.0.2.1",
+		}))
+		if err != nil {
+			t.Fatalf("Load() error = %v", err)
+		}
+		if !cfg.Umami.Enabled() {
+			t.Error("Umami not enabled with both set")
+		}
+		if len(cfg.TrustedProxies) != 2 {
+			t.Errorf("TrustedProxies = %v, want two", cfg.TrustedProxies)
+		}
+	})
+
+	for name, values := range map[string]map[string]string{
+		"only the URL":        {"UMAMI_URL": "https://umami.example.test"},
+		"only the website id": {"UMAMI_WEBSITE_ID": id},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			_, err := Load(env(values))
+			if err == nil || !strings.Contains(err.Error(), "UMAMI_") {
+				t.Fatalf("Load() error = %v, want a startup error naming UMAMI_", err)
+			}
+			if strings.Contains(err.Error(), "umami.example.test") {
+				t.Errorf("error repeats the URL: %v", err)
+			}
+		})
+	}
+
+	t.Run("invalid proxy list", func(t *testing.T) {
+		t.Parallel()
+		if _, err := Load(env(map[string]string{"TRUSTED_PROXIES": "not-a-cidr"})); err == nil {
+			t.Fatal("Load() error = nil, want an error for TRUSTED_PROXIES")
+		}
+	})
+}
+
 func TestLoadRejectsAnInvalidLogLevel(t *testing.T) {
 	t.Parallel()
 

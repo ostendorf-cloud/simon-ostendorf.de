@@ -6,8 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/netip"
 	"net/url"
 
+	"github.com/ostendorf-cloud/govue/analytics"
+	"github.com/ostendorf-cloud/govue/clientip"
 	"github.com/ostendorf-cloud/govue/envconf"
 	"github.com/ostendorf-cloud/govue/logging"
 )
@@ -19,7 +22,9 @@ const DefaultSiteURL = "https://simon-ostendorf.de"
 // Config is every setting this binary reads from the environment. There is
 // no secret-shaped field yet: this site serves prerendered pages and the
 // built SPA bundle, plus the operational endpoints, with no session, no
-// form and no credential of its own.
+// form and no credential of its own. The Umami website id and URL are not
+// secrets either: the id is public in Umami's own script snippet and the
+// URL is an endpoint name.
 type Config struct {
 	// Addr is the public HTTP listener's address.
 	Addr string
@@ -31,6 +36,13 @@ type Config struct {
 	// sitemap and robots.txt build every absolute URL from.
 	SiteURL  *url.URL
 	LogLevel slog.Level
+	// TrustedProxies are the reverse proxies whose X-Forwarded-For header is
+	// believed when resolving a visitor's address. Empty trusts nothing, so a
+	// visitor behind a proxy then looks like the proxy and is not counted.
+	TrustedProxies []netip.Prefix
+	// Umami is the connection to Umami, the zero value when page view counting
+	// is off. It is on only when UMAMI_URL and UMAMI_WEBSITE_ID are both set.
+	Umami analytics.Config
 }
 
 // Load reads every setting through envconf, so a misconfigured deployment
@@ -50,6 +62,19 @@ func Load(getenv func(string) string) (Config, error) {
 		problems = append(problems, err)
 	}
 	cfg.LogLevel = level
+
+	proxies, err := clientip.ParseCIDRs(l.String("TRUSTED_PROXIES", ""))
+	if err != nil {
+		problems = append(problems, err)
+	}
+	cfg.TrustedProxies = proxies
+
+	// LoadConfig reports every problem with the four UMAMI_ variables at
+	// once, and a half set pair is one of them.
+	cfg.Umami, err = analytics.LoadConfig(getenv)
+	if err != nil {
+		problems = append(problems, err)
+	}
 
 	if err := errors.Join(append(problems, l.Err())...); err != nil {
 		return Config{}, fmt.Errorf("config: %w", err)

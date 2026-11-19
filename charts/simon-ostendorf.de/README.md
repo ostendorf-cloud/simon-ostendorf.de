@@ -46,6 +46,18 @@ there is nothing secret-shaped to put in one yet.
 more than one replica, or two pods briefly coexisting during an ordinary rolling update, is
 harmless. The Deployment rolls out with the default `RollingUpdate` strategy.
 
+## Trusted proxies and shutdown
+
+`config.trustedProxies` refuses a `/0` range (`0.0.0.0/0` or `::/0`) in the values schema. Such a
+range trusts `X-Forwarded-For` from any peer, so any client could choose the address that page
+view counting reports. List the proxy's own range instead. An empty value is allowed, also with
+`ingress.enabled`: counting is optional, and it then simply sees no visitor behind the proxy.
+
+The shutdown budget is about 28 seconds: 2 seconds readiness drain, up to 20 seconds for requests
+in flight, up to 5 seconds to send queued page views and 1 second of grace inside govue's
+`analytics` close. `terminationGracePeriodSeconds` defaults to 30 to cover it. Lower it only
+together with the application's own timeouts.
+
 ## Health, readiness and metrics
 
 `/healthz`, `/readyz` and `/metrics` are served on a second, administrative listener
@@ -123,7 +135,11 @@ See `values.yaml` for the full, commented list. The ones most deployments touch:
 | `resources` | Pod resource requests/limits | see `values.yaml` |
 | `config.addr` | Address the public HTTP server listens on | `:8080` |
 | `config.adminAddr` | govue's admin listener address (`ADMIN_ADDR`); must match `service.adminPort` | `:8081` |
+| `terminationGracePeriodSeconds` | Time the pod has to shut down, see "Trusted proxies and shutdown" | `30` |
 | `config.logLevel` | `debug`, `info`, `warn` or `error` | `info` |
+| `config.trustedProxies` | Comma separated CIDRs of the reverse proxies whose `X-Forwarded-For` is believed (`TRUSTED_PROXIES`). Set it behind an ingress or Gateway, or page view counting sees no visitor | `""` |
+| `umami.url` | Base URL of the Umami instance (`UMAMI_URL`). Not a secret. Counting is on only when this and `umami.websiteId` are both set | `""` |
+| `umami.websiteId` | The website's UUID in Umami (`UMAMI_WEBSITE_ID`). Not a secret | `""` |
 
 ## Upgrading
 

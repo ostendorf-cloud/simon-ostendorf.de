@@ -40,7 +40,10 @@ The global baseline already applies here and is not repeated below.
   trailing slash canonicalisation, and serving the matching prerendered file or a locale's
   own 404 page, all built from `internal/routes`' embedded table. `sitemap.go` serves
   `robots.txt` and `sitemap.xml` from that same table, each `<url>` carrying an hreflang
-  alternate for both locales. `AdminHandler` is the second, smaller handler govue's admin
+  alternate for both locales. Page views are counted on the server by govue's `analytics`
+  middleware, innermost around the mux: it reads the route pattern, and `RequestID` replaces
+  the request, so nothing may sit between it and the mux. See the README's "Page view
+  counting". `AdminHandler` is the second, smaller handler govue's admin
   listener serves: health, readiness and metrics, reached only from inside the cluster, never
   through the chart's own Ingress.
 - `internal/depsync` checks that `go.mod` and `web/package.json` pin the same govue version,
@@ -104,7 +107,6 @@ content is each its own issue and none of it is implemented yet:
 - The CV as a page, rendered from the data the `cv` repository publishes, with the PDF offered
   for download.
 - Contact, with a proof of work challenge and SMTP delivery.
-- Server side page view counting with Umami.
 - Imprint and privacy content. This domain needs its own, unlike ostendorf.tech's.
   `old_simon-ostendorf.de` was this domain's previous site, the event technology business
   before it moved to ostendorf.tech, and carried this domain's previous imprint and privacy
@@ -126,7 +128,8 @@ content is each its own issue and none of it is implemented yet:
   `postinstall` hook, not a plain registry entry: it is not in the mise registry, and
   `helm plugin install <url>` is forbidden by the baseline regardless of Helm version.
 - The chart ships no `existingSecret` block, no `replicaCount` upper bound or
-  `strategy.type: Recreate`, and no `config.trustedProxyCidrs` required-when-ingress guard:
-  this milestone has no secret-shaped configuration, no in-process session state, and no
-  client-IP-based rate limiting yet. Add each guard back only once the application actually
-  needs it.
+  `strategy.type: Recreate`: this milestone has no secret-shaped configuration and no
+  in-process session state. Add each guard back only once the application actually needs it.
+- `config.trustedProxies` (`TRUSTED_PROXIES`) exists because page view counting resolves the
+  visitor address, but the chart has no required-when-ingress guard for it: counting is
+  optional, and an empty value only means no visitor is counted behind a proxy.

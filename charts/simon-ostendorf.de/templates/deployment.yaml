@@ -46,6 +46,7 @@ spec:
       # not only the ServiceAccount, since the pod spec's own value would
       # otherwise win if it were ever left unset here.
       automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -68,6 +69,18 @@ spec:
               value: {{ .Values.config.adminAddr | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.config.logLevel | quote }}
+            {{- with .Values.config.trustedProxies }}
+            - name: TRUSTED_PROXIES
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.umami.url }}
+            - name: UMAMI_URL
+              value: {{ .Values.umami.url | quote }}
+            {{- end }}
+            {{- if .Values.umami.websiteId }}
+            - name: UMAMI_WEBSITE_ID
+              value: {{ .Values.umami.websiteId | quote }}
+            {{- end }}
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
