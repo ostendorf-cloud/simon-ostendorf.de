@@ -115,14 +115,14 @@ import { OPERATOR } from './operator'
 
     <section class="flex flex-col gap-3">
       <h2 class="text-xl font-semibold text-text">3. Your rights</h2>
-      <p>Under the General Data Protection Regulation you have the right to:</p>
+      <p>Under the General Data Protection Regulation you have:</p>
       <ul class="flex list-disc flex-col gap-2 pl-6">
-        <li>access to your processed data (Art. 15 GDPR)</li>
-        <li>rectification of inaccurate data (Art. 16 GDPR)</li>
-        <li>erasure (Art. 17 GDPR)</li>
-        <li>restriction of processing (Art. 18 GDPR)</li>
-        <li>data portability (Art. 20 GDPR)</li>
-        <li>object to processing (Art. 21 GDPR)</li>
+        <li>the right of access to your data (Art. 15 GDPR)</li>
+        <li>the right to rectification of inaccurate data (Art. 16 GDPR)</li>
+        <li>the right to erasure (Art. 17 GDPR)</li>
+        <li>the right to restriction of processing (Art. 18 GDPR)</li>
+        <li>the right to data portability (Art. 20 GDPR)</li>
+        <li>the right to object to processing (Art. 21 GDPR)</li>
       </ul>
       <p>
         Please contact

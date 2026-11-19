@@ -110,10 +110,22 @@ func registerRoutes(mux *http.ServeMux, p *pageServer, wrap func(http.Handler) h
 			mux.Handle(routePattern(locale, slug), wrap(p.routeHandler(locale, slug)))
 			if legalSlugs[slug] {
 				target := "/" + locale + "/" + slug
-				mux.Handle(legalSlashPattern(locale, slug), wrap(http.RedirectHandler(target, http.StatusMovedPermanently)))
+				mux.Handle(legalSlashPattern(locale, slug), wrap(legalSlashRedirect(target)))
 			}
 		}
 	}
+}
+
+// legalSlashRedirect answers a legal page's old trailing slash form with a 301
+// to its canonical path. It sets a short cache lifetime on purpose: a browser
+// caches a bare 301 forever, and this redirect reverses the one this site
+// served for these two pages before, which clients may still hold.
+func legalSlashRedirect(target string) http.Handler {
+	redirect := http.RedirectHandler(target, http.StatusMovedPermanently)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+		redirect.ServeHTTP(w, r)
+	})
 }
 
 // pageServer answers every document and static asset request out of the

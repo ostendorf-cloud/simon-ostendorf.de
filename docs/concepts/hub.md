@@ -114,8 +114,4 @@
 - One locale or two. ostendorf.tech runs German and English through a shared route table;
   this site currently has no router or i18n setup at all. Owner: decide before the route
   table and prerender step are built.
-- What address the imprint and privacy pages disclose as the responsible party's address.
-  A private individual's residential address raises different privacy considerations than a
-  business premises, which is itself why the cv data model keeps the postal address entry
-  non-public. Owner: the site's operator, before the imprint page is written.
 - Exact contact channel and address shown on the contact page. Owner: the site's operator.

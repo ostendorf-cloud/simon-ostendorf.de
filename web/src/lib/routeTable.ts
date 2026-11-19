@@ -16,6 +16,20 @@ export interface RouteEntry {
 export const LEGAL_SLUGS: readonly string[] = ['imprint', 'privacy', 'terms']
 
 /**
+ * pagePath is the canonical path of a page in locale, the one rule the
+ * canonical and hreflang URLs, the sitemap and the router share with the
+ * server (internal/webapp's routePattern and routeURL): a trailing slash,
+ * except for a legal page, whose path is govue's /<locale>/<page>. The home
+ * page and the 404 page have an empty slug and give /<locale>/.
+ */
+export function pagePath(locale: string, slug: string, legal = false): string {
+  if (slug === '') {
+    return `/${locale}/`
+  }
+  return legal ? `/${locale}/${slug}` : `/${locale}/${slug}/`
+}
+
+/**
  * validateRouteTable enforces the same invariants
  * internal/routes/routes.go's Parse enforces for the Go side, so a
  * malformed table fails here too instead of silently corrupting seo.ts's

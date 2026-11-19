@@ -91,7 +91,7 @@ import { OPERATOR } from './operator'
           speichert und protokolliert Ihre IP-Adresse nicht.
         </p>
         <p>
-          Wer den Header „Do Not Track“ (<code>DNT: 1</code>) oder „Global Privacy Control“ (<code
+          Wer den Header Do Not Track (<code>DNT: 1</code>) oder Global Privacy Control (<code
             >Sec-GPC: 1</code
           >) sendet, wird nicht gezählt. Nicht gezählt werden außerdem Vorabrufe, Bots, Anfragen von
           privaten Adressen, Weiterleitungen, Fehlerseiten, Dateien wie Skripte und Bilder sowie

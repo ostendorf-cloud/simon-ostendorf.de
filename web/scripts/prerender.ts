@@ -20,7 +20,7 @@ import { useTheme } from '@ostendorf-cloud/govue'
 
 import App from '../src/App.vue'
 import { createAppI18n, installI18n, SUPPORTED_LOCALES, type Locale } from '../src/i18n'
-import { routeTable, type RouteEntry } from '../src/lib/routeTable'
+import { pagePath, routeTable, type RouteEntry } from '../src/lib/routeTable'
 import {
   canonical,
   SITE_URL,
@@ -190,10 +190,7 @@ function renderDocument(locale: Locale, head: string, body: string): string {
  *  every page except a legal one, whose canonical path is govue's
  *  /<locale>/<page>. */
 function routeUrl(locale: Locale, entry: RouteEntry): string {
-  if (entry.slug === '') {
-    return `${SITE_URL}/${locale}/`
-  }
-  return `${SITE_URL}/${locale}/${entry.slug}${entry.legal ? '' : '/'}`
+  return SITE_URL + pagePath(locale, entry.slug, entry.legal)
 }
 
 /** sitemapXml renders the sitemap govue-check-legal reads. The server serves

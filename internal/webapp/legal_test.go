@@ -87,6 +87,10 @@ func TestLegalPagesAreServedWithoutATrailingSlash(t *testing.T) {
 		if rec.Code != http.StatusMovedPermanently || rec.Header().Get("Location") != target {
 			t.Errorf("GET %s/ = %d to %q, want 301 to %s", target, rec.Code, rec.Header().Get("Location"), target)
 		}
+		// A bare 301 is cached forever, and this one reverses the old direction.
+		if got := rec.Header().Get("Cache-Control"); got != "public, max-age=3600" {
+			t.Errorf("GET %s/ Cache-Control = %q, want public, max-age=3600", target, got)
+		}
 	}
 }
 
