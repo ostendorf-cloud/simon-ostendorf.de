@@ -46,6 +46,20 @@ The global baseline already applies here and is not repeated below.
   counting". `AdminHandler` is the second, smaller handler govue's admin
   listener serves: health, readiness and metrics, reached only from inside the cluster, never
   through the chart's own Ingress.
+- The legal pages follow govue's scheme. `routes.json` marks the imprint and the privacy page
+  `"legal": true`: their canonical path is `/<locale>/<page>` with no trailing slash (every
+  other page keeps it), served by an exact pattern, with the slash form redirecting to it. The
+  sitemap lists the same path. `language.HandleLegal` (outside any wrapper, `Terms` off)
+  registers `/imprint`, `/privacy` and the German aliases `/impressum`, `/datenschutz`,
+  `/datenschutzerklaerung` as 302 redirects, which analytics never counts. This site has no
+  terms, so `/terms` and `/agb` do not exist: add a terms page, `Terms: true` and
+  `--require-terms` together if that changes. `web/src/legal` holds the site's own texts, one
+  component per page and language, and `operator.ts`, the one place the operator facts live.
+  The footer is `GovueFooter` with `legal`. `task prerender` also writes `sitemap.xml` into
+  `prerendered/` and ends with `govue-check-legal`; `cmd/website`'s
+  `TestPrerenderedSitemapMatchesServedSitemap` pins that file to the sitemap the server
+  serves. A change to what the site stores or sends (a form, a cookie, a third party) must
+  change the privacy texts in both languages in the same pull request.
 - `internal/depsync` checks that `go.mod` and `web/package.json` pin the same govue version,
   and that `web/pnpm-lock.yaml` still resolves govue's Vue package to its `/web` subdirectory.
 - `web/` is the Vue SPA, consuming govue's Vue package as a pnpm git dependency. `web/src/i18n`
@@ -55,9 +69,9 @@ The global baseline already applies here and is not repeated below.
   `web/src/router/index.ts` builds one vue-router route per `routes.json` entry, plus the
   locale redirect and the 404 route. `web/src/lib/seo.ts` resolves each route's title, meta
   description and hreflang alternates from the same table. `web/src/views` holds this
-  milestone's five page shells (home, cv, contact, imprint, privacy), each a heading and
-  nothing else: a page's actual content is a separate issue, see "Scope of this milestone"
-  below. `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
+  milestone's five pages (home, cv, contact, imprint, privacy); home, cv and contact are
+  a heading and nothing else, their content is a separate issue, see "Scope of this
+  milestone" below. `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
   locale switch and the theme toggle. `web/scripts/prerender.ts` is the static site
   generation step `task prerender` runs, server-rendering every route of every locale into
   `cmd/website/prerendered`. `web/src/theme/simon-ostendorf-de.css` is this site's theme
@@ -98,21 +112,18 @@ task check
 ## Scope of this milestone
 
 The tooling, CI, the Helm chart, the container build, the bilingual page shell, the one route
-table and its prerendering are in place. Each of the five pages the shell routes to
-(home/about, cv, contact, imprint, privacy) carries a heading and nothing else; the actual
-content is each its own issue and none of it is implemented yet:
+table and its prerendering are in place, and so are the imprint and privacy pages. Each of
+the three other pages the shell routes to (home/about, cv, contact) carries a heading and
+nothing else; the actual content is each its own issue and none of it is implemented yet:
 
 - A short page about the person, with two clear ways on: development at ostendorf.dev, event
   technology at ostendorf.tech.
 - The CV as a page, rendered from the data the `cv` repository publishes, with the PDF offered
   for download.
 - Contact, with a proof of work challenge and SMTP delivery.
-- Imprint and privacy content. This domain needs its own, unlike ostendorf.tech's.
-  `old_simon-ostendorf.de` was this domain's previous site, the event technology business
-  before it moved to ostendorf.tech, and carried this domain's previous imprint and privacy
-  pages; ostendorf.tech has already ported most of that content. Prefer ostendorf.tech's own
-  version over old_simon-ostendorf.de's when the two differ, since it is newer, once this
-  milestone is actually implemented. None of that content is ported here now.
+- Done: the imprint and privacy texts, this domain's own and written for what this site does
+  today. The contact page will add a form and mail delivery: the privacy texts must grow with
+  it, they now say there is no form.
 
 ## Deviations
 

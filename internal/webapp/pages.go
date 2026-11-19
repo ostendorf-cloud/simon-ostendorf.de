@@ -28,23 +28,27 @@ const defaultLocale = "de"
 // page means editing that one file, routes.json, not this map. A
 // malformed routes.json is a build bug, caught by internal/routes' own
 // tests before it ever reaches this package; see mustRouteFiles.
-var routeFiles = mustRouteFiles()
+var routeFiles, legalSlugs = mustRouteFiles()
 
-// mustRouteFiles loads the embedded route table and indexes it by slug.
-// A load failure here can only mean routes.json itself is malformed: it
-// is checked in, not a runtime input, so a panic is the right response
-// rather than threading an error through every caller of this package
-// level table.
-func mustRouteFiles() map[string]string {
+// mustRouteFiles loads the embedded route table and indexes it by slug,
+// plus the set of slugs marked legal. A load failure here can only mean
+// routes.json itself is malformed: it is checked in, not a runtime input,
+// so a panic is the right response rather than threading an error through
+// every caller of this package level table.
+func mustRouteFiles() (files map[string]string, legal map[string]bool) {
 	table, err := routes.Load()
 	if err != nil {
 		panic("webapp: " + err.Error())
 	}
-	files := make(map[string]string, len(table))
+	files = make(map[string]string, len(table))
+	legal = make(map[string]bool)
 	for _, r := range table {
 		files[r.Slug] = r.File
+		if r.Legal {
+			legal[r.Slug] = true
+		}
 	}
-	return files
+	return files, legal
 }
 
 // routeSlugs lists routeFiles' keys in a deterministic, sorted order, so
@@ -80,6 +84,18 @@ func routePattern(locale, slug string) string {
 	if slug == "" {
 		return "GET /" + locale + "/{$}"
 	}
+	if legalSlugs[slug] {
+		// govue's canonical legal path has no trailing slash: the footer
+		// links, language.HandleLegal's redirects and govue-check-legal all
+		// use exactly /<locale>/<slug>.
+		return "GET /" + locale + "/" + slug
+	}
+	return "GET /" + locale + "/" + slug + "/{$}"
+}
+
+// legalSlashPattern is the pattern of a legal page's trailing slash form,
+// which redirects to the canonical path without it.
+func legalSlashPattern(locale, slug string) string {
 	return "GET /" + locale + "/" + slug + "/{$}"
 }
 
@@ -92,6 +108,10 @@ func registerRoutes(mux *http.ServeMux, p *pageServer, wrap func(http.Handler) h
 	for _, locale := range locales {
 		for _, slug := range routeSlugs() {
 			mux.Handle(routePattern(locale, slug), wrap(p.routeHandler(locale, slug)))
+			if legalSlugs[slug] {
+				target := "/" + locale + "/" + slug
+				mux.Handle(legalSlashPattern(locale, slug), wrap(http.RedirectHandler(target, http.StatusMovedPermanently)))
+			}
 		}
 	}
 }

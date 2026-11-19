@@ -18,8 +18,8 @@ func TestLoadParsesTheCheckedInRouteTable(t *testing.T) {
 		{Name: "home", Slug: "", File: "index.html"},
 		{Name: "cv", Slug: "cv", File: "cv/index.html"},
 		{Name: "contact", Slug: "contact", File: "contact/index.html"},
-		{Name: "imprint", Slug: "imprint", File: "imprint/index.html"},
-		{Name: "privacy", Slug: "privacy", File: "privacy/index.html"},
+		{Name: "imprint", Slug: "imprint", File: "imprint/index.html", Legal: true},
+		{Name: "privacy", Slug: "privacy", File: "privacy/index.html", Legal: true},
 	}
 	if len(table) != len(want) {
 		t.Fatalf("Load() returned %d routes, want %d: %+v", len(table), len(want), table)
@@ -54,6 +54,14 @@ func TestParse(t *testing.T) {
 		"entry missing name": {
 			input:   `[{"name":"","slug":"imprint","file":"imprint/index.html"}]`,
 			wantErr: true,
+		},
+		"legal entry with a slug govue does not redirect to": {
+			input:   `[{"name":"about","slug":"about","file":"about/index.html","legal":true}]`,
+			wantErr: true,
+		},
+		"legal entry": {
+			input: `[{"name":"imprint","slug":"imprint","file":"imprint/index.html","legal":true}]`,
+			want:  []Route{{Name: "imprint", Slug: "imprint", File: "imprint/index.html", Legal: true}},
 		},
 		"entry missing file": {
 			input:   `[{"name":"imprint","slug":"imprint","file":""}]`,

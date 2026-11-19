@@ -1,13 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { GovuePage } from '@ostendorf-cloud/govue'
+import { GovueLegalPage } from '@ostendorf-cloud/govue'
 
-const { t } = useI18n()
+import ImprintTextDe from '../legal/ImprintTextDe.vue'
+import ImprintTextEn from '../legal/ImprintTextEn.vue'
+
+const { t, locale } = useI18n()
+const text = computed(() => (locale.value === 'en' ? ImprintTextEn : ImprintTextDe))
 </script>
 
 <template>
-  <!-- This domain's own imprint content is a separate issue; see
-       AGENTS.md's "Scope of this milestone". This shell only has to
-       carry a heading. -->
-  <GovuePage :title="t('legal.imprint.title')" />
+  <!-- The header already carries the language switch and App.vue the skip
+       link, so the shell's own are off. -->
+  <GovueLegalPage
+    page="imprint"
+    :title="t('legal.imprint.title')"
+    :language-switch="false"
+    :skip-link="false"
+  >
+    <component :is="text" />
+  </GovueLegalPage>
 </template>

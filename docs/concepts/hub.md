@@ -67,17 +67,17 @@
   file. Reason: the CV page is exactly the kind of content worth indexing, prerendering is
   already proven in this organisation's own govue scaffold family, and it is a natural fit
   once CV data is a build-time input rather than a page-load fetch.
-- **Imprint and privacy: a private person's page, not a business's.** The responsible party
-  structure ("verantwortliche Stelle"), the GDPR rights boilerplate sections, the TDDDG cookie
-  framing, and the overall section layout carry over from ostendorf.tech's reviewed wording,
-  preferred over old_simon-ostendorf.de's because it is the newer, legally reviewed version.
-  What does not carry over: the VAT ID and Kleinunternehmer-specific wording (this is not a
-  registered business on this domain), the Streitbeilegungsverfahren/VSBG dispute resolution
-  clause either version carried (ostendorf.tech dropped it; this page should not reintroduce
-  it), and the Instagram-specific section, which only applies if this site actually runs that
-  processing. The Umami section does apply: the owner decided that all sites count page views
-  on the server through govue's Umami module, off until configured. The privacy page states
-  what is counted from the README's section "Page view counting".
+- **Imprint and privacy: this domain's own texts, on govue's legal routes.** Both pages are
+  written for what this site does and state only what the code and the repository documents
+  back. The imprint names the operator (name, address, phone, e-mail, VAT ID) and has no
+  dispute resolution section. The privacy page covers the controller, what the site itself
+  stores (no cookie, the theme choice in local storage), the server side page view counting
+  from the README's section "Page view counting", contact by e-mail or phone, the rights of
+  data subjects and the right to complain. Hosting, processors, retention and the legal basis
+  are not stated: no repository document backs them yet. The Instagram section does not
+  apply. Served at `/de/imprint`, `/en/imprint`, `/de/privacy` and `/en/privacy` with govue's
+  redirects from `/imprint`, `/privacy` and the German aliases. No terms page: this site
+  sells nothing.
 - Runs on the existing govue scaffold: the public `Handler` serves the five pages and the
   contact endpoint, govue's admin listener keeps health, readiness and metrics internal, and
   the Helm chart already in this repository ships it.

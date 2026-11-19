@@ -7,7 +7,13 @@ export interface RouteEntry {
   name: string
   slug: string
   file: string
+  /** One of govue's legal pages: canonical path /<locale>/<slug>, no
+   *  trailing slash. Mirrors Route.Legal in routes.go. */
+  legal?: boolean
 }
+
+/** LEGAL_SLUGS mirrors routes.LegalSlugs in routes.go. */
+export const LEGAL_SLUGS: readonly string[] = ['imprint', 'privacy', 'terms']
 
 /**
  * validateRouteTable enforces the same invariants
@@ -49,6 +55,9 @@ export function validateRouteTable(table: readonly RouteEntry[]): void {
     }
     if (entry.file === '') {
       throw new Error(`routeTable: route "${entry.name}" has no file`)
+    }
+    if (entry.legal && !LEGAL_SLUGS.includes(entry.slug)) {
+      throw new Error(`routeTable: legal route "${entry.name}" has slug "${entry.slug}"`)
     }
     if (names.has(entry.name)) {
       throw new Error(`routeTable: duplicate name "${entry.name}"`)

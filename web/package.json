@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "prerender": "vite build --ssr scripts/prerender.ts --outDir .prerender-ssr --emptyOutDir && node .prerender-ssr/prerender.js && rm -rf .prerender-ssr",
+    "prerender": "vite build --ssr scripts/prerender.ts --outDir .prerender-ssr --emptyOutDir && node .prerender-ssr/prerender.js && rm -rf .prerender-ssr && pnpm run check:legal",
+    "check:legal": "govue-check-legal --dir ../cmd/website/prerendered",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

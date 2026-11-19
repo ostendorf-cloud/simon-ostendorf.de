@@ -156,7 +156,10 @@ func TestEveryPageIsCountedUnderItsRoutePattern(t *testing.T) {
 		for _, slug := range routeSlugs() {
 			path := "/" + locale + "/"
 			if slug != "" {
-				path += slug + "/"
+				path += slug
+				if !legalSlugs[slug] {
+					path += "/"
+				}
 			}
 			if rec := serve(app, visitor(t, path)); rec.Code != http.StatusOK {
 				t.Fatalf("GET %s status = %d, want 200", path, rec.Code)
@@ -209,6 +212,12 @@ func TestOnlyPagesAreCounted(t *testing.T) {
 		{name: "static asset", path: "/assets/app.js"},
 		{name: "robots", path: "/robots.txt"},
 		{name: "sitemap", path: "/sitemap.xml"},
+		{name: "legal path redirect", path: "/imprint"},
+		{name: "German imprint alias", path: "/impressum"},
+		{name: "German privacy alias", path: "/datenschutz"},
+		{name: "German privacy long alias", path: "/datenschutzerklaerung"},
+		{name: "legal trailing slash redirect", path: "/de/imprint/"},
+		{name: "terms are not registered", path: "/terms"},
 		{name: "HEAD", path: "/de/cv/", method: http.MethodHead},
 		{name: "Do Not Track", path: "/de/cv/", header: map[string]string{"DNT": "1"}},
 		{name: "Global Privacy Control", path: "/de/cv/", header: map[string]string{"Sec-GPC": "1"}},
@@ -227,12 +236,12 @@ func TestOnlyPagesAreCounted(t *testing.T) {
 			serve(app, req)
 		})
 	}
-	serve(app, visitor(t, "/en/privacy/"))
+	serve(app, visitor(t, "/en/privacy"))
 	closeApp(t, app)
 
 	got := stub.payloads(t)
-	if len(got) != 1 || got[0].URL != "/en/privacy/" {
-		t.Fatalf("reported %+v, want exactly one view for /en/privacy/", got)
+	if len(got) != 1 || got[0].URL != "/en/privacy" {
+		t.Fatalf("reported %+v, want exactly one view for /en/privacy", got)
 	}
 }
 

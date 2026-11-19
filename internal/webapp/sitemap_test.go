@@ -46,8 +46,9 @@ func TestSitemapHandlerListsEveryRouteAndLocaleWithAlternates(t *testing.T) {
 	for _, want := range []string{
 		"<loc>https://simon-ostendorf.de/de/</loc>",
 		"<loc>https://simon-ostendorf.de/en/</loc>",
-		"<loc>https://simon-ostendorf.de/de/imprint/</loc>",
-		"<loc>https://simon-ostendorf.de/en/imprint/</loc>",
+		"<loc>https://simon-ostendorf.de/de/imprint</loc>",
+		"<loc>https://simon-ostendorf.de/en/imprint</loc>",
+		"<loc>https://simon-ostendorf.de/de/cv/</loc>",
 		`hreflang="de"`,
 		`hreflang="en"`,
 		`hreflang="x-default"`,
@@ -63,8 +64,9 @@ func TestRouteURL(t *testing.T) {
 		slug string
 		want string
 	}{
-		"home has no slug":  {"", "https://simon-ostendorf.de/de/"},
-		"a page has a slug": {"imprint", "https://simon-ostendorf.de/de/imprint/"},
+		"home has no slug":                   {"", "https://simon-ostendorf.de/de/"},
+		"a page has a slug":                  {"cv", "https://simon-ostendorf.de/de/cv/"},
+		"a legal page has no trailing slash": {"imprint", "https://simon-ostendorf.de/de/imprint"},
 	}
 
 	for name, tc := range tests {

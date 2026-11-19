@@ -19,10 +19,11 @@ import { createMemoryHistory } from 'vue-router'
 import { useTheme } from '@ostendorf-cloud/govue'
 
 import App from '../src/App.vue'
-import { createAppI18n, SUPPORTED_LOCALES, type Locale } from '../src/i18n'
-import { routeTable } from '../src/lib/routeTable'
+import { createAppI18n, installI18n, SUPPORTED_LOCALES, type Locale } from '../src/i18n'
+import { routeTable, type RouteEntry } from '../src/lib/routeTable'
 import {
   canonical,
+  SITE_URL,
   fullTitle,
   hreflangAlternates,
   NOT_FOUND,
@@ -124,7 +125,7 @@ async function renderBody(locale: Locale, routerName: string): Promise<string> {
 
   const app = createSSRApp(App)
   app.use(router)
-  app.use(i18n)
+  installI18n(app, i18n)
 
   await router.push({ name: routerName, params: { locale } })
   await router.isReady()
@@ -184,6 +185,46 @@ function renderDocument(locale: Locale, head: string, body: string): string {
 `
 }
 
+/** routeUrl is the absolute sitemap URL of a route table entry in locale:
+ *  the same rule internal/webapp's routeURL applies, a trailing slash for
+ *  every page except a legal one, whose canonical path is govue's
+ *  /<locale>/<page>. */
+function routeUrl(locale: Locale, entry: RouteEntry): string {
+  if (entry.slug === '') {
+    return `${SITE_URL}/${locale}/`
+  }
+  return `${SITE_URL}/${locale}/${entry.slug}${entry.legal ? '' : '/'}`
+}
+
+/** sitemapXml renders the sitemap govue-check-legal reads. The server serves
+ *  its own sitemap.xml, built from the same route table and SITE_URL;
+ *  cmd/website's TestPrerenderedSitemapMatchesServedSitemap fails when the
+ *  two differ in a single byte, so this file is a build input for the check
+ *  and never a second source of truth. */
+function sitemapXml(): string {
+  const entries = [...routeTable].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+  ]
+  for (const entry of entries) {
+    for (const locale of SUPPORTED_LOCALES) {
+      lines.push('  <url>', `    <loc>${routeUrl(locale, entry)}</loc>`)
+      for (const alt of SUPPORTED_LOCALES) {
+        lines.push(
+          `    <xhtml:link rel="alternate" hreflang="${alt}" href="${routeUrl(alt, entry)}"/>`,
+        )
+      }
+      lines.push(
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${routeUrl('de', entry)}"/>`,
+        '  </url>',
+      )
+    }
+  }
+  lines.push('</urlset>', '')
+  return lines.join('\n')
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -208,6 +249,10 @@ async function main(): Promise<void> {
       console.log(`wrote ${target}`)
     }
   }
+
+  const sitemap = join(outDir, 'sitemap.xml')
+  await writeFile(sitemap, sitemapXml(), 'utf-8')
+  console.log(`wrote ${sitemap}`)
 }
 
 main().catch((error: unknown) => {

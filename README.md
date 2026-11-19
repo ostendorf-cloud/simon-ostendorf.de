@@ -52,8 +52,9 @@ second, administrative listener (`ADMIN_ADDR`), never on the public one.
 Page views are counted on the server with [Umami](https://umami.is), through govue's
 `analytics` package. No script runs in the browser and nothing reaches it.
 
-What is counted, and what is not. This is the factual basis for the privacy page, whose text
-belongs to the legal pages issue:
+What is counted, and what is not. This is the factual basis for the privacy page
+(`web/src/legal/PrivacyText*.vue`), which states the same in both languages. Change both
+together:
 
 - A view is counted after a page was served: a `GET` that answered 200 with an HTML page.
 - The URL reported is the route pattern, for example `/de/cv/`. The query string, an identifier

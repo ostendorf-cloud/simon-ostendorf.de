@@ -31,8 +31,8 @@ const slugs: Record<string, string> = Object.fromEntries(
 )
 slugs[NOT_FOUND] = ''
 
-/** path is the absolute path of route in locale, always starting and
- *  ending with a slash. */
+/** path is the absolute path of route in locale: /<locale>/<slug>, which
+ *  for a legal page is govue's canonical path exactly. */
 export function path(locale: Locale, route: PageRoute): string {
   return `/${locale}/${slugs[route]}`
 }

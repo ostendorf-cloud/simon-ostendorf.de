@@ -21,7 +21,9 @@ describe('router', () => {
 
   it.each(routeTable)('routes $name to the path implied by its routes.json slug', (entry) => {
     const record = router.getRoutes().find((r) => r.name === entry.name)
-    const wantPath = entry.slug === '' ? '/:locale(de|en)/' : `/:locale(de|en)/${entry.slug}/`
+    const trailing = entry.legal ? '' : '/'
+    const wantPath =
+      entry.slug === '' ? '/:locale(de|en)/' : `/:locale(de|en)/${entry.slug}${trailing}`
     expect(record?.path).toBe(wantPath)
   })
 

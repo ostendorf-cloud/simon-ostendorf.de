@@ -23,7 +23,8 @@ const target = computed(() => {
     params: { ...route.params, locale: otherLocale.value },
     hash: route.hash,
   }).href
-  return href.endsWith('/') ? href : `${href}/`
+  // A legal page's canonical path has no trailing slash, so it is left as is.
+  return href.endsWith('/') || route.meta.legal === true ? href : `${href}/`
 })
 </script>
 

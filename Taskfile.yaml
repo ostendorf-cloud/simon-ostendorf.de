@@ -117,6 +117,15 @@ tasks:
     cmds:
       - go test -race -count=1 -run TestPrerenderedOutputMatchesRouteTable ./cmd/website/...
 
+  # "task prerender" already ends with this check, so no build ships without it. The
+  # target exists to run it alone and to give CI a job of its own.
+  check:legal:
+    desc: govue-check-legal over the prerendered output, the legal pages and their footer links
+    dir: web
+    deps: [prerender]
+    cmds:
+      - pnpm run check:legal
+
   web:deps:
     desc: Install the web/ dependencies
     dir: web
@@ -195,6 +204,7 @@ tasks:
       - task: web:test
       - task: web:build
       - task: prerender
+      - task: check:legal
       - task: build
       - task: test:go
       - task: check:govue-version
