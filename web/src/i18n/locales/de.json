@@ -34,7 +34,20 @@
       "title": "Simon Ostendorf",
       "description": "Die persönliche Seite von Simon Ostendorf, mit Verweisen auf die Entwicklungsarbeit auf ostendorf.dev und die Veranstaltungstechnik auf ostendorf.tech."
     },
-    "heading": "Simon Ostendorf"
+    "heading": "Simon Ostendorf",
+    "lead": "Das ist die persönliche Seite von Simon Ostendorf. Von hier aus geht es zu zwei weiteren Seiten.",
+    "ways": {
+      "dev": {
+        "title": "Entwicklung",
+        "text": "Die Entwicklungsarbeit finden Sie auf ostendorf.dev.",
+        "link": "Zu ostendorf.dev"
+      },
+      "tech": {
+        "title": "Veranstaltungstechnik",
+        "text": "Die Veranstaltungstechnik finden Sie auf ostendorf.tech.",
+        "link": "Zu ostendorf.tech"
+      }
+    }
   },
   "cv": {
     "meta": {
