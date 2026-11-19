@@ -85,7 +85,15 @@
       "properties": {
         "addr": { "type": "string", "minLength": 1 },
         "adminAddr": { "type": "string", "minLength": 1 },
-        "logLevel": { "type": "string", "enum": ["debug", "info", "warn", "error"] }
+        "logLevel": { "type": "string", "enum": ["debug", "info", "warn", "error"] },
+        "trustedProxies": { "type": "string" }
+      }
+    },
+    "umami": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "websiteId": { "type": "string" }
       }
     }
   }

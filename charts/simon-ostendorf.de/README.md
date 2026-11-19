@@ -124,6 +124,9 @@ See `values.yaml` for the full, commented list. The ones most deployments touch:
 | `config.addr` | Address the public HTTP server listens on | `:8080` |
 | `config.adminAddr` | govue's admin listener address (`ADMIN_ADDR`); must match `service.adminPort` | `:8081` |
 | `config.logLevel` | `debug`, `info`, `warn` or `error` | `info` |
+| `config.trustedProxies` | Comma separated CIDRs of the reverse proxies whose `X-Forwarded-For` is believed (`TRUSTED_PROXIES`). Set it behind an ingress or Gateway, or page view counting sees no visitor | `""` |
+| `umami.url` | Base URL of the Umami instance (`UMAMI_URL`). Not a secret. Counting is on only when this and `umami.websiteId` are both set | `""` |
+| `umami.websiteId` | The website's UUID in Umami (`UMAMI_WEBSITE_ID`). Not a secret | `""` |
 
 ## Upgrading
 

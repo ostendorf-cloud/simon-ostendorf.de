@@ -165,3 +165,15 @@ config:
   # templates/deployment.yaml's second container port and probes.
   adminAddr: ":8081"
   logLevel: "info"
+  # Comma separated CIDRs of the reverse proxies (the ingress controller or
+  # the Gateway) whose X-Forwarded-For header is believed (TRUSTED_PROXIES).
+  # Page view counting needs it behind a proxy: with it empty every request
+  # comes from the proxy's private address and no visitor is counted.
+  trustedProxies: ""
+
+# Page view counting with Umami, from the server. Off unless both url and
+# websiteId are set; setting only one makes the pod fail at startup, by design. Neither is a secret:
+# the url names an endpoint and the website id is not a credential.
+umami:
+  url: ""
+  websiteId: ""

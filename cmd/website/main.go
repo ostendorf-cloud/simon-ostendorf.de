@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -51,7 +52,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	return httpserver.RunAdmin(ctx, httpserver.Config{
+	runErr := httpserver.RunAdmin(ctx, httpserver.Config{
 		Addr:    cfg.Addr,
 		Handler: app.Handler(),
 		Logger:  logger,
@@ -64,4 +65,8 @@ func run() error {
 		Addr:    cfg.AdminAddr,
 		Handler: app.AdminHandler(),
 	})
+
+	// Both listeners have stopped: send the page views still queued, within
+	// a bounded time.
+	return errors.Join(runErr, app.Close())
 }

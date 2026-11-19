@@ -17,11 +17,16 @@
 package webapp
 
 import (
+	"context"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"time"
 
+	"github.com/ostendorf-cloud/govue/analytics"
+	"github.com/ostendorf-cloud/govue/clientip"
 	"github.com/ostendorf-cloud/govue/health"
 	"github.com/ostendorf-cloud/govue/metrics"
 	"github.com/ostendorf-cloud/govue/middleware"
@@ -34,6 +39,9 @@ type App struct {
 	logger  *slog.Logger
 	pages   *pageServer
 	siteURL *url.URL
+
+	// analytics is never nil after New; it is inert when counting is off.
+	analytics *analytics.Client
 
 	health         *health.Registry
 	metricsHandler http.Handler
@@ -56,13 +64,48 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 
 	registry := metrics.NewRegistry()
 
+	// Page view counting. The resolver trusts X-Forwarded-For only from the
+	// configured proxies, so a visitor behind the ingress is not mistaken for
+	// the ingress. The hostname reported is the public host from SITE_URL,
+	// never the request's Host header. A zero Config gives an inert client.
+	views, err := analytics.New(cfg.Umami, analytics.Options{
+		Hostname: cfg.SiteURL.Hostname(),
+		Logger:   logger,
+		ClientIP: clientip.NewResolver(cfg.TrustedProxies),
+		OnDrop: metrics.NewCounter(registry, "analytics_views_dropped_total",
+			"Page views lost to a full queue or a shutdown before they reached Umami."),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("webapp: %w", err)
+	}
+	// govue logs nothing when counting is off, so say it once here. The line
+	// never carries the Umami URL.
+	if views.Enabled() {
+		logger.Info("page view counting is on")
+	} else {
+		logger.Info("page view counting is off: UMAMI_URL and UMAMI_WEBSITE_ID are not set")
+	}
+
 	return &App{
 		logger:         logger,
 		pages:          pages,
 		siteURL:        cfg.SiteURL,
+		analytics:      views,
 		health:         health.New(),
 		metricsHandler: metrics.Handler(registry),
 	}, nil
+}
+
+// analyticsCloseTimeout bounds how long Close waits for the queued page
+// views to be posted.
+const analyticsCloseTimeout = 5 * time.Second
+
+// Close sends the page views still queued, within analyticsCloseTimeout. Call
+// it after the public listener has stopped.
+func (a *App) Close() error {
+	ctx, cancel := context.WithTimeout(context.Background(), analyticsCloseTimeout)
+	defer cancel()
+	return a.analytics.Close(ctx)
 }
 
 // Health exposes the health registry so main can pass its Drain method as
@@ -88,9 +131,14 @@ func (a *App) Handler() http.Handler {
 	registerRoutes(mux, a.pages, func(h http.Handler) http.Handler { return h })
 	mux.Handle("/", a.pages.pageHandler())
 
+	// Analytics is innermost, directly around the mux: it reads the route
+	// pattern the mux sets, and RequestID replaces the request with
+	// WithContext, so any middleware between would hide the pattern. It is
+	// the mux itself when counting is off.
 	return middleware.Chain(mux,
 		middleware.Recover(a.logger),
 		middleware.RequestID(a.logger),
+		a.analytics.Middleware,
 	)
 }
 
