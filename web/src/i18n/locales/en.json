@@ -34,7 +34,20 @@
       "title": "Simon Ostendorf",
       "description": "Simon Ostendorf's personal page, pointing to the development work at ostendorf.dev and the event technology business at ostendorf.tech."
     },
-    "heading": "Simon Ostendorf"
+    "heading": "Simon Ostendorf",
+    "lead": "This is the personal page of Simon Ostendorf. From here you can go on to two other sites.",
+    "ways": {
+      "dev": {
+        "title": "Development",
+        "text": "The development work is on ostendorf.dev.",
+        "link": "Go to ostendorf.dev"
+      },
+      "tech": {
+        "title": "Event technology",
+        "text": "The event technology business is on ostendorf.tech.",
+        "link": "Go to ostendorf.tech"
+      }
+    }
   },
   "cv": {
     "meta": {

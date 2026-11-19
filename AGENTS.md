@@ -69,7 +69,8 @@ The global baseline already applies here and is not repeated below.
   `web/src/router/index.ts` builds one vue-router route per `routes.json` entry, plus the
   locale redirect and the 404 route. `web/src/lib/seo.ts` resolves each route's title, meta
   description and hreflang alternates from the same table. `web/src/views` holds this
-  milestone's five pages (home, cv, contact, imprint, privacy); home, cv and contact are
+  milestone's five pages (home, cv, contact, imprint, privacy); the home page is the landing
+  page with two plain external links (ostendorf.dev, ostendorf.tech), cv and contact are
   a heading and nothing else, their content is a separate issue, see "Scope of this
   milestone" below. `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
   locale switch and the theme toggle. `web/scripts/prerender.ts` is the static site
@@ -115,11 +116,11 @@ task check
 
 The tooling, CI, the Helm chart, the container build, the bilingual page shell, the one route
 table and its prerendering are in place, and so are the imprint and privacy pages. Each of
-the three other pages the shell routes to (home/about, cv, contact) carries a heading and
+the two other pages the shell routes to (cv, contact) carries a heading and
 nothing else; the actual content is each its own issue and none of it is implemented yet:
 
-- A short page about the person, with two clear ways on: development at ostendorf.dev, event
-  technology at ostendorf.tech.
+- Done: the landing page, a short page about the person with two clear ways on: development
+  at ostendorf.dev, event technology at ostendorf.tech.
 - The CV as a page, rendered from the data the `cv` repository publishes, with the PDF offered
   for download.
 - Contact, with a proof of work challenge and SMTP delivery.
