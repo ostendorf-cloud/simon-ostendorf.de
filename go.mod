@@ -2,7 +2,7 @@ module github.com/ostendorf-cloud/simon-ostendorf.de
 
 go 1.27
 
-require github.com/ostendorf-cloud/govue v0.4.0
+require github.com/ostendorf-cloud/govue v0.5.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -12,6 +12,6 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.0 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
