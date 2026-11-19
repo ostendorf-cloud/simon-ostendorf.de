@@ -45,7 +45,7 @@ second, administrative listener (`ADMIN_ADDR`), never on the public one.
 | `UMAMI_WEBSITE_ID` | The website's UUID in Umami. Not a secret | unset, counting off | no |
 | `UMAMI_TIMEOUT` | Bound of one post to Umami, 1s to 30s | `5s` | no |
 | `UMAMI_QUEUE_SIZE` | Views waiting to be sent, 1 to 10000. A full queue drops the view | `256` | no |
-| `TRUSTED_PROXIES` | Comma separated CIDRs of the reverse proxies whose `X-Forwarded-For` is believed. Needed behind an ingress for counting to see visitors | empty, trust nothing | no |
+| `TRUSTED_PROXIES` | Comma separated CIDRs of the reverse proxies whose `X-Forwarded-For` is believed. Needed behind an ingress for counting and the access log to see visitors | empty, trust nothing | no |
 
 ## Page view counting
 
@@ -61,7 +61,7 @@ together:
   and the raw request path are never sent.
 - No cookie is set and nothing is read from the visitor's device.
 - The visitor's address is masked to its /24 (IPv4) or /48 (IPv6) before it is sent, and is
-  never stored or logged by this site.
+  never stored by Umami. The application's own access log is separate, see below.
 - Also sent: the user agent, the first language tag of `Accept-Language`, and the origin
   (scheme, host, port, no path) of another site that linked here.
 - A visitor who sends `DNT: 1` or `Sec-GPC: 1` is not counted at all.
@@ -74,6 +74,16 @@ at startup which it is. Behind a reverse proxy set `TRUSTED_PROXIES`, or every r
 like it came from the proxy and none is counted. A slow or unreachable Umami never delays a
 response: views go through a bounded queue and are dropped when it is full, counted in the
 `analytics_views_dropped_total` metric.
+
+## Access log
+
+The application writes one structured line per request through govue's `middleware.AccessLog`:
+method, route pattern (never the raw path or query), status, bytes, duration, the client address
+and the request id. The client address is resolved through `TRUSTED_PROXIES`, so behind an
+ingress it is the visitor and not the proxy. No user agent and no referrer are logged. The
+health routes of the admin listener are not on this handler. The privacy page (2.1) states
+these fields, and separately the cluster ingress log, which is outside this repository. Both
+logs are kept 30 days, operated by the owner. Change the fields and the text together.
 
 ## Container
 

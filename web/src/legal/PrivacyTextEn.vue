@@ -43,9 +43,30 @@ import { OPERATOR } from './operator'
       <div class="flex flex-col gap-3">
         <h3 class="text-lg font-semibold text-text">2.1 Serving the pages</h3>
         <p>
-          The application serves ready made pages. It writes no access log while doing so. On an
-          internal error it writes one line with the request method and a random request identifier,
-          without your IP address and without the path you requested.
+          The application serves ready made pages and writes an access log while doing so, one line
+          per request. The line contains:
+        </p>
+        <ul class="flex list-disc flex-col gap-2 pl-6">
+          <li>the request method</li>
+          <li>the page as a route pattern, never the path or the parameters</li>
+          <li>the HTTP status code and the amount of data transferred</li>
+          <li>the duration of the request</li>
+          <li>
+            your IP address, logged in full; behind the ingress in front of the application it is
+            the address the ingress reports as yours
+          </li>
+          <li>a random request identifier</li>
+        </ul>
+        <p>
+          The user agent, the referrer and the requested path with its parameters are not logged. On
+          an internal error the application additionally writes one line with the request method and
+          the request identifier, without your IP address and without the path.
+        </p>
+        <p>
+          Separately, the cluster's ingress in front of the application logs every request in a log
+          of its own. It contains your IP address, the date and time, the request line with path and
+          parameters, the HTTP status code, the amount of data transferred, the referrer if your
+          browser sends it, and the user agent.
         </p>
       </div>
 
@@ -90,8 +111,14 @@ import { OPERATOR } from './operator'
           <li>the host name of this website and the identifier of the website at Umami</li>
         </ul>
         <p>
-          Umami derives country, region and city from the shortened IP address. This website does
-          not store or log your IP address.
+          Umami derives country, region and city from the shortened IP address. From the shortened
+          IP address, the user agent, a secret key and the current month, Umami forms a pseudonymous
+          identifier to group together the page views of one visit; the identifier therefore changes
+          every month. Umami does not receive the full IP address and does not store the full user
+          agent, only the information derived from them (country, region, city, browser, operating
+          system) together with the pseudonymous identifier. No merging with other data, and no
+          identification of individual visitors, takes place. The application's access log (2.1) and
+          the ingress log are separate from this.
         </p>
         <p>
           A visitor who sends the Do Not Track header (<code>DNT: 1</code>) or Global Privacy
@@ -116,17 +143,37 @@ import { OPERATOR } from './operator'
       <div class="flex flex-col gap-3">
         <h3 class="text-lg font-semibold text-text">2.6 Operation, retention and legal basis</h3>
         <p>
-          This website is operated on my own hardware in Germany, at my home. There is no hosting
-          provider and no processor for hosting.
+          This website is operated on my own hardware in Germany. There is no hosting provider and
+          no processor for hosting.
         </p>
         <p>
-          The logs of the application and of the ingress in front of it are deleted after 30 days.
-          The statistics data in Umami is deleted after 14 months.
+          The application's access log and the log of the ingress in front of it are each deleted
+          after 30 days. The statistics data in Umami is deleted after 14 months.
+        </p>
+        <p>The legal basis for both logs and for counting page views is Art. 6(1)(f) GDPR.</p>
+        <p>
+          The logs serve the secure and stable operation of the website, the analysis of errors and
+          the defence against abuse.
         </p>
         <p>
-          The legal basis for the logs and for counting page views is Art. 6(1)(f) GDPR. I have a
-          legitimate interest in the secure and stable operation of the website and in anonymous
+          Counting page views serves to understand how the website is used, in a pseudonymous
           measurement of its reach.
+        </p>
+        <p>
+          I have weighed this interest against your rights and freedoms and keep the data to a
+          minimum.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <h3 class="text-lg font-semibold text-text">2.7 Objection</h3>
+        <p>
+          You can object to the counting of page views and to the logs at any time (Art. 21 GDPR) by
+          writing to me at
+          <a class="text-accent-text hover:underline" :href="`mailto:${OPERATOR.email}`">{{
+            OPERATOR.email
+          }}</a>. You object to the counting automatically when your browser sends Do Not Track or
+          Global Privacy Control; the website honours these signals.
         </p>
       </div>
     </section>

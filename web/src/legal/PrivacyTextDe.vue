@@ -39,9 +39,30 @@ import { OPERATOR } from './operator'
       <div class="flex flex-col gap-3">
         <h3 class="text-lg font-semibold text-text">2.1 Auslieferung der Seiten</h3>
         <p>
-          Die Anwendung liefert fertige Seiten aus. Sie schreibt dabei kein Zugriffsprotokoll. Bei
-          einem internen Fehler schreibt sie eine Zeile mit der Anfragemethode und einer zufälligen
-          Anfragekennung, ohne Ihre IP-Adresse und ohne den aufgerufenen Pfad.
+          Die Anwendung liefert fertige Seiten aus und schreibt dabei ein Zugriffsprotokoll mit
+          einer Zeile je Anfrage. Die Zeile enthält:
+        </p>
+        <ul class="flex list-disc flex-col gap-2 pl-6">
+          <li>die Anfragemethode</li>
+          <li>die aufgerufene Seite als Routenmuster, nie den Pfad oder die Parameter</li>
+          <li>den HTTP-Statuscode und die Menge der übertragenen Daten</li>
+          <li>die Dauer der Bearbeitung</li>
+          <li>
+            Ihre IP-Adresse, die ungekürzt protokolliert wird; hinter dem vorgeschalteten Ingress
+            ist es die Adresse, die dieser als Ihre meldet
+          </li>
+          <li>eine zufällige Anfragekennung</li>
+        </ul>
+        <p>
+          Nicht protokolliert werden der User-Agent, der Referrer und der aufgerufene Pfad mit
+          seinen Parametern. Bei einem internen Fehler schreibt die Anwendung zusätzlich eine Zeile
+          mit der Anfragemethode und der Anfragekennung, ohne Ihre IP-Adresse und ohne den Pfad.
+        </p>
+        <p>
+          Unabhängig davon protokolliert der Ingress des Clusters, der vor der Anwendung steht,
+          jeden Aufruf in einem eigenen Protokoll. Es enthält Ihre IP-Adresse, Datum und Uhrzeit,
+          die Anfragezeile mit Pfad und Parametern, den HTTP-Statuscode, die übertragene Datenmenge,
+          den Referrer, sofern Ihr Browser ihn übermittelt, und den User-Agent.
         </p>
       </div>
 
@@ -88,8 +109,15 @@ import { OPERATOR } from './operator'
           <li>der Hostname dieser Website und die Kennung der Website bei Umami</li>
         </ul>
         <p>
-          Umami leitet aus der gekürzten IP-Adresse Land, Region und Stadt ab. Diese Website
-          speichert und protokolliert Ihre IP-Adresse nicht.
+          Umami leitet aus der gekürzten IP-Adresse Land, Region und Stadt ab. Aus gekürzter
+          IP-Adresse, User-Agent, einem geheimen Schlüssel und dem laufenden Monat bildet Umami eine
+          pseudonyme Kennung, um die Seitenaufrufe eines Besuchs zusammenzufassen; die Kennung
+          wechselt deshalb jeden Monat. Die vollständige IP-Adresse erhält Umami nicht, und den
+          vollständigen User-Agent speichert Umami nicht, sondern nur die daraus abgeleiteten
+          Angaben (Land, Region, Stadt, Browser, Betriebssystem) zusammen mit der pseudonymen
+          Kennung. Eine Zusammenführung mit anderen Daten oder eine Identifizierung einzelner
+          Besucher findet nicht statt. Das Zugriffsprotokoll der Anwendung (2.1) und das Protokoll
+          des Ingress sind davon getrennt.
         </p>
         <p>
           Wer den Header Do Not Track (<code>DNT: 1</code>) oder Global Privacy Control (<code
@@ -117,17 +145,42 @@ import { OPERATOR } from './operator'
           2.6 Betrieb, Aufbewahrung und Rechtsgrundlage
         </h3>
         <p>
-          Diese Website wird auf eigener Hardware in Deutschland betrieben, bei mir zu Hause. Es
-          gibt keinen Hosting-Anbieter und keinen Auftragsverarbeiter für das Hosting.
+          Diese Website wird auf eigener Hardware in Deutschland betrieben. Es gibt keinen
+          Hosting-Anbieter und keinen Auftragsverarbeiter für das Hosting.
         </p>
         <p>
-          Die Protokolle der Anwendung und des vorgeschalteten Ingress werden nach 30 Tagen
-          gelöscht. Die Statistikdaten von Umami werden nach 14 Monaten gelöscht.
+          Das Zugriffsprotokoll der Anwendung und das Protokoll des vorgeschalteten Ingress werden
+          jeweils nach 30 Tagen gelöscht. Die Statistikdaten von Umami werden nach 14 Monaten
+          gelöscht.
         </p>
         <p>
-          Die Rechtsgrundlage für die Protokolle und für die Zählung der Seitenaufrufe ist Art. 6
-          Abs. 1 lit. f DSGVO. Ich habe ein berechtigtes Interesse an einem sicheren und stabilen
-          Betrieb der Website und an einer anonymen Messung ihrer Reichweite.
+          Die Rechtsgrundlage für beide Protokolle und für die Zählung der Seitenaufrufe ist Art. 6
+          Abs. 1 lit. f DSGVO.
+        </p>
+        <p>
+          Die Protokolle dienen dem sicheren und stabilen Betrieb der Website, der Analyse von
+          Fehlern und der Abwehr von Missbrauch.
+        </p>
+        <p>
+          Die Zählung der Seitenaufrufe dient dazu, zu verstehen, wie die Website genutzt wird, in
+          einer pseudonymen Messung ihrer Reichweite.
+        </p>
+        <p>
+          Ich habe dieses Interesse gegen Ihre Rechte und Freiheiten abgewogen und halte die Daten
+          knapp.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <h3 class="text-lg font-semibold text-text">2.7 Widerspruch</h3>
+        <p>
+          Sie können der Zählung der Seitenaufrufe und den Protokollen jederzeit widersprechen (Art.
+          21 DSGVO), indem Sie mir an
+          <a class="text-accent-text hover:underline" :href="`mailto:${OPERATOR.email}`">{{
+            OPERATOR.email
+          }}</a>
+          schreiben. Automatisch widersprechen Sie der Zählung, indem Ihr Browser Do Not Track oder
+          Global Privacy Control sendet; diese Signale beachtet die Website.
         </p>
       </div>
     </section>

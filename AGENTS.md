@@ -35,17 +35,21 @@ The global baseline already applies here and is not repeated below.
   side adds is checked by both validators without touching the other test file.
 - `internal/webapp` builds two HTTP handlers from govue's packages. `Handler` is the public
   one: the SPA's static assets, the prerendered page for every known route and locale,
-  `robots.txt` and `sitemap.xml`, and the catch-all document handler, behind panic recovery
-  and a request id. `pages.go` is that catch-all handler: the locale redirect at `/`,
-  trailing slash canonicalisation, and serving the matching prerendered file or a locale's
-  own 404 page, all built from `internal/routes`' embedded table. `sitemap.go` serves
-  `robots.txt` and `sitemap.xml` from that same table, each `<url>` carrying an hreflang
-  alternate for both locales. Page views are counted on the server by govue's `analytics`
-  middleware, innermost around the mux: it reads the route pattern, and `RequestID` replaces
-  the request, so nothing may sit between it and the mux. See the README's "Page view
-  counting". `AdminHandler` is the second, smaller handler govue's admin
-  listener serves: health, readiness and metrics, reached only from inside the cluster, never
-  through the chart's own Ingress.
+  `robots.txt` and `sitemap.xml`, and the catch-all document handler, behind panic recovery,
+  a request id and govue's access log (`middleware.AccessLog`: one line per request with the
+  route pattern, the client address resolved through `TRUSTED_PROXIES`, no user agent; the
+  privacy text 2.1 names exactly these fields, change both together). The chain is `Recover`,
+  `RequestID`, the access log, then analytics, which stays innermost around the mux because it
+  and the access log read the route pattern the mux sets. `pages.go` is that catch-all
+  handler: the locale redirect at `/`, trailing slash canonicalisation, and serving the
+  matching prerendered file or a locale's own 404 page, all built from `internal/routes`'
+  embedded table. `sitemap.go` serves `robots.txt` and `sitemap.xml` from that same table,
+  each `<url>` carrying an hreflang alternate for both locales. Page views are counted on the
+  server by govue's `analytics` middleware, innermost around the mux: it reads the route
+  pattern, and `RequestID` replaces the request, so nothing may sit between it and the mux.
+  See the README's "Page view counting". `AdminHandler` is the second, smaller handler govue's
+  admin listener serves: health, readiness and metrics, reached only from inside the cluster,
+  never through the chart's own Ingress.
 - The legal pages follow govue's scheme. `routes.json` marks the imprint and the privacy page
   `"legal": true`: their canonical path is `/<locale>/<page>` with no trailing slash (every
   other page keeps it), served by an exact pattern, with the slash form redirecting to it. The
@@ -144,6 +148,7 @@ nothing else; the actual content is each its own issue and none of it is impleme
 - The chart ships no `existingSecret` block, no `replicaCount` upper bound or
   `strategy.type: Recreate`: this milestone has no secret-shaped configuration and no
   in-process session state. Add each guard back only once the application actually needs it.
-- `config.trustedProxies` (`TRUSTED_PROXIES`) exists because page view counting resolves the
-  visitor address, but the chart has no required-when-ingress guard for it: counting is
-  optional, and an empty value only means no visitor is counted behind a proxy.
+- `config.trustedProxies` (`TRUSTED_PROXIES`) exists because page view counting and the
+  access log resolve the visitor address, but the chart has no required-when-ingress guard for
+  it: an empty value only means no visitor is counted and the access log shows the proxy's
+  address behind an ingress.

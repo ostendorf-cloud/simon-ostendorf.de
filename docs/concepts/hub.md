@@ -73,11 +73,17 @@
   dispute resolution section. The privacy page covers the controller, what the site itself
   stores (no cookie, the theme choice in local storage), the server side page view counting
   from the README's section "Page view counting", contact by e-mail or phone, the rights of
-  data subjects and the right to complain. Section 2.6 states the operator's facts: the site
-  runs on the owner's own hardware in Germany with no hosting provider and no processor for
-  hosting, logs are kept 30 days, Umami statistics 14 months, and the legal basis for logs and
-  counting is Art. 6(1)(f) GDPR. The Instagram section does not
-  apply. Served at `/de/imprint`, `/en/imprint`, `/de/privacy` and `/en/privacy` with govue's
+  data subjects and the right to complain. Section 2.1 names the application's access log
+  (method, route pattern, status, bytes, duration, the client address resolved behind the
+  trusted proxies, request id; no user agent, no referrer, never the path or query) and the
+  cluster ingress log as a separate log (address, time, request line with path and query,
+  status, bytes, referrer, user agent: the owner's facts, taken from the previous site's
+  privacy text). Section 2.6 states the operator's facts: the site runs on the owner's own
+  hardware in Germany with no hosting provider and no processor for hosting, both logs are kept
+  30 days, Umami statistics 14 months, and the legal basis for logs and counting is Art.
+  6(1)(f) GDPR. Section 2.7 is the right to object (Art. 21 GDPR) by e-mail, and for counting
+  by Do Not Track and Global Privacy Control. The Instagram section does not apply. Served at
+  `/de/imprint`, `/en/imprint`, `/de/privacy` and `/en/privacy` with govue's
   redirects from `/imprint`, `/privacy` and the German aliases. No terms page: this site
   sells nothing.
 - Runs on the existing govue scaffold: the public `Handler` serves the five pages and the

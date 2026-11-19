@@ -82,12 +82,71 @@ describe.each(locales)('the %s privacy page', (locale) => {
   it('states own hardware, retention and the legal basis, and names no hosting provider', () => {
     const text = page().textContent ?? ''
     expect(text).toContain(locale === 'de' ? 'eigener Hardware' : 'own hardware')
-    expect(text).toContain('30')
-    expect(text).toContain('14')
+    expect(text).toContain(locale === 'de' ? 'nach 30 Tagen' : 'after 30 days')
+    expect(text).toContain(locale === 'de' ? 'nach 14 Monaten' : 'after 14 months')
     expect(text).toMatch(
       locale === 'de' ? /Art\. 6\s+Abs\. 1 lit\. f DSGVO/ : /Art\. 6\(1\)\(f\) GDPR/,
     )
+    expect(text).not.toMatch(/zu hause|at home|at my home/i)
     expect(text).not.toMatch(/hetzner|strato|ionos|ovh|aws|amazon/i)
+  })
+
+  it('states the access log fields and the separate ingress log', () => {
+    const text = page().textContent ?? ''
+    if (locale === 'de') {
+      expect(text).toContain('Zugriffsprotokoll')
+      expect(text).toContain('Routenmuster')
+      expect(text).toContain('Ingress des Clusters')
+      expect(text).toContain('Anfragezeile mit Pfad und Parametern')
+      expect(text).toContain('der User-Agent, der Referrer und der aufgerufene Pfad')
+    } else {
+      expect(text).toContain('access log')
+      expect(text).toContain('route pattern')
+      expect(text).toContain("cluster's ingress")
+      expect(text).toContain('request line with path and parameters')
+      expect(text).toContain('The user agent, the referrer and the requested path')
+    }
+  })
+
+  it('no longer claims the IP address is neither stored nor logged', () => {
+    const text = page().textContent ?? ''
+    expect(text).not.toMatch(
+      /IP-Adresse nicht|not store or log your IP|kein Zugriffsprotokoll|no access log/i,
+    )
+  })
+
+  it('states one legitimate interest sentence per purpose and the weighing', () => {
+    const text = page().textContent ?? ''
+    const sentences =
+      locale === 'de'
+        ? [
+            'Die Protokolle dienen dem sicheren und stabilen Betrieb der Website, der Analyse von Fehlern und der Abwehr von Missbrauch.',
+            'Die Zählung der Seitenaufrufe dient dazu, zu verstehen, wie die Website genutzt wird',
+            'Ich habe dieses Interesse gegen Ihre Rechte und Freiheiten abgewogen und halte die Daten knapp.',
+          ]
+        : [
+            'The logs serve the secure and stable operation of the website, the analysis of errors and the defence against abuse.',
+            'Counting page views serves to understand how the website is used',
+            'I have weighed this interest against your rights and freedoms and keep the data to a minimum.',
+          ]
+    for (const sentence of sentences) {
+      expect(text).toContain(sentence)
+    }
+  })
+
+  it('uses the pseudonymous wording and has a right to object paragraph', () => {
+    const text = page().textContent ?? ''
+    expect(text).not.toMatch(/anonym/i)
+    expect(text).toContain(locale === 'de' ? 'pseudonymen Messung' : 'pseudonymous measurement')
+    expect(text).not.toMatch(
+      /Datenschutzbeauftragte|data protection officer|Empfänger|recipient|Cloudflare|Let's Encrypt|Drittland|third countr/i,
+    )
+    expect(text).toContain('Art. 21')
+    expect(text).toContain(
+      locale === 'de'
+        ? 'Global Privacy Control sendet; diese Signale beachtet die Website'
+        : 'Global Privacy Control; the website honours these signals',
+    )
   })
 
   it('no longer hedges the counting on a set up Umami instance', () => {
