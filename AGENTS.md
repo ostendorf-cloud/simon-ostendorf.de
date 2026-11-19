@@ -75,8 +75,10 @@ The global baseline already applies here and is not repeated below.
   locale switch and the theme toggle. `web/scripts/prerender.ts` is the static site
   generation step `task prerender` runs, server-rendering every route of every locale into
   `cmd/website/prerendered`. `web/src/theme/simon-ostendorf-de.css` is this site's theme
-  file, filling govue's token contract; see its own comment for why it carries a borrowed,
-  placeholder palette rather than a real brand colour yet.
+  file, filling govue's token contract. It is generated from the two seed colours in
+  `web/src/theme/seeds.json` (accent, neutral) by govue's theme generator: change a seed, then
+  run `pnpm run theme:generate` in `web/` and commit both files. `contrast.test.ts` fails a
+  text pair below WCAG 2.2 AA in either mode.
 - `charts/simon-ostendorf.de/` is the Helm chart. `charts/simon-ostendorf.de/README.md` covers
   installing and configuring it.
 
