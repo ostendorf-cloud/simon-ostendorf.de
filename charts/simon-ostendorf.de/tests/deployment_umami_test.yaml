@@ -37,6 +37,42 @@ tests:
             name: UMAMI_WEBSITE_ID
             value: 123e4567-e89b-42d3-a456-426614174000
 
+  - it: gives the pod 30 seconds to terminate by default
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 30
+
+  - it: renders with ingress on and no trusted proxies, since counting is optional
+    set:
+      ingress:
+        enabled: true
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: refuses 0.0.0.0/0 as a trusted proxy range
+    set:
+      config:
+        trustedProxies: 0.0.0.0/0
+    asserts:
+      - failedTemplate:
+          errorPattern: trustedProxies
+
+  - it: refuses ::/0 inside a list as a trusted proxy range
+    set:
+      config:
+        trustedProxies: "10.0.0.0/8, ::/0"
+    asserts:
+      - failedTemplate:
+          errorPattern: trustedProxies
+
+  - it: accepts a range that merely ends in a digit zero such as 10.0.0.0/8 and 172.16.0.0/10
+    set:
+      config:
+        trustedProxies: "10.0.0.0/8,172.16.0.0/10"
+    asserts:
+      - notFailedTemplate: {}
+
   - it: wires TRUSTED_PROXIES when set
     set:
       config:

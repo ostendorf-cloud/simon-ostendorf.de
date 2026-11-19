@@ -88,6 +88,12 @@ func (s *umamiStub) payloads(t *testing.T) []sentPayload {
 // pointed at stub, or off when stub is nil.
 func countingApp(t *testing.T, stub *umamiStub, proxies []netip.Prefix, logger *slog.Logger) *App {
 	t.Helper()
+	return countingAppFor(t, "https://simon-ostendorf.de", stub, proxies, logger)
+}
+
+// countingAppFor is countingApp with a chosen SITE_URL.
+func countingAppFor(t *testing.T, site string, stub *umamiStub, proxies []netip.Prefix, logger *slog.Logger) *App {
+	t.Helper()
 
 	page := &fstest.MapFile{Data: []byte("<!doctype html><title>page</title>")}
 	prerendered := fstest.MapFS{}
@@ -99,7 +105,7 @@ func countingApp(t *testing.T, stub *umamiStub, proxies []netip.Prefix, logger *
 	}
 	dist := fstest.MapFS{"assets/app.js": &fstest.MapFile{Data: []byte("console.log('app')")}}
 
-	siteURL, err := url.Parse("https://simon-ostendorf.de")
+	siteURL, err := url.Parse(site)
 	if err != nil {
 		t.Fatalf("url.Parse() error = %v", err)
 	}
@@ -304,6 +310,19 @@ func TestForwardedClientIsCountedOnlyBehindATrustedProxy(t *testing.T) {
 		}
 	})
 
+	t.Run("public peer spoofing X-Forwarded-For keeps its own address", func(t *testing.T) {
+		stub := newUmamiStub(t, nil)
+		app := countingApp(t, stub, []netip.Prefix{netip.MustParsePrefix("10.0.0.0/8")}, nil)
+		req := visitor(t, "/de/")
+		req.Header.Set("X-Forwarded-For", "198.51.100.7")
+		serve(app, req)
+		closeApp(t, app)
+		got := stub.payloads(t)
+		if len(got) != 1 || got[0].IP != "203.0.113.0" {
+			t.Fatalf("reported %+v, want one view with the peer's own /24 203.0.113.0", got)
+		}
+	})
+
 	t.Run("untrusted", func(t *testing.T) {
 		stub := newUmamiStub(t, nil)
 		app := countingApp(t, stub, nil, nil)
@@ -315,7 +334,49 @@ func TestForwardedClientIsCountedOnlyBehindATrustedProxy(t *testing.T) {
 	})
 }
 
-// TestCountingIsOffWithoutConfiguration proves the site serves normally and
+// TestHostnameHasNoPort proves the reported hostname is the host of SITE_URL
+// without its port.
+func TestHostnameHasNoPort(t *testing.T) {
+	stub := newUmamiStub(t, nil)
+	app := countingAppFor(t, "https://simon-ostendorf.test:8443", stub, nil, nil)
+	serve(app, visitor(t, "/de/"))
+	closeApp(t, app)
+
+	got := stub.payloads(t)
+	if len(got) != 1 || got[0].Hostname != "simon-ostendorf.test" {
+		t.Fatalf("reported %+v, want hostname simon-ostendorf.test without a port", got)
+	}
+}
+
+// TestSlowUmamiAtShutdownIsNoFailure proves a Close that runs out of time
+// logs a warning and returns no error, so a normal SIGTERM exits cleanly.
+func TestSlowUmamiAtShutdownIsNoFailure(t *testing.T) {
+	release := make(chan struct{})
+	stub := newUmamiStub(t, release)
+	var logs bytes.Buffer
+	app := countingApp(t, stub, nil, slog.New(slog.NewTextHandler(&logs, nil)))
+	app.closeTimeout = 50 * time.Millisecond
+	// Release the stub even when an assertion fails, or its Close would block.
+	var once sync.Once
+	releaseStub := func() { once.Do(func() { close(release) }) }
+	t.Cleanup(releaseStub)
+
+	serve(app, visitor(t, "/de/"))
+	// Wait until the worker holds the post, so Close has something to time out on.
+	deadline := time.Now().Add(2 * time.Second)
+	for len(stub.rawBodies()) == 0 && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+	}
+	if err := app.Close(); err != nil {
+		t.Fatalf("Close() error = %v, want nil for a deadline", err)
+	}
+	releaseStub()
+	if !strings.Contains(logs.String(), "were not sent") {
+		t.Errorf("no warning logged: %q", logs.String())
+	}
+}
+
+// TestCountingIsOffWithoutConfigurationproves the site serves normally and
 // says once that counting is off, without naming any URL.
 func TestCountingIsOffWithoutConfiguration(t *testing.T) {
 	var logs bytes.Buffer

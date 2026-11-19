@@ -46,6 +46,7 @@ spec:
       # not only the ServiceAccount, since the pod spec's own value would
       # otherwise win if it were ever left unset here.
       automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

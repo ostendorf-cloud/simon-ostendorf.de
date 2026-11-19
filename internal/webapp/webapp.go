@@ -18,6 +18,7 @@ package webapp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -42,6 +43,8 @@ type App struct {
 
 	// analytics is never nil after New; it is inert when counting is off.
 	analytics *analytics.Client
+	// closeTimeout bounds Close; a test shortens it.
+	closeTimeout time.Duration
 
 	health         *health.Registry
 	metricsHandler http.Handler
@@ -91,6 +94,7 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 		pages:          pages,
 		siteURL:        cfg.SiteURL,
 		analytics:      views,
+		closeTimeout:   analyticsCloseTimeout,
 		health:         health.New(),
 		metricsHandler: metrics.Handler(registry),
 	}, nil
@@ -101,11 +105,19 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 const analyticsCloseTimeout = 5 * time.Second
 
 // Close sends the page views still queued, within analyticsCloseTimeout. Call
-// it after the public listener has stopped.
+// it after the public listener has stopped. Views that did not make it in
+// time are lost, which is logged at warn level and is no failure: a slow Umami
+// must not turn a normal SIGTERM into a failed exit. Any other error is
+// returned.
 func (a *App) Close() error {
-	ctx, cancel := context.WithTimeout(context.Background(), analyticsCloseTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), a.closeTimeout)
 	defer cancel()
-	return a.analytics.Close(ctx)
+	err := a.analytics.Close(ctx)
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		a.logger.Warn("page views still queued at shutdown were not sent", "error", err)
+		return nil
+	}
+	return err
 }
 
 // Health exposes the health registry so main can pass its Drain method as

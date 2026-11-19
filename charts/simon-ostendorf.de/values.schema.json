@@ -73,6 +73,7 @@
         }
       }
     },
+    "terminationGracePeriodSeconds": { "type": "integer", "minimum": 0 },
     "resources": { "type": "object" },
     "startupProbe": { "type": "object" },
     "livenessProbe": { "type": "object" },
@@ -86,7 +87,11 @@
         "addr": { "type": "string", "minLength": 1 },
         "adminAddr": { "type": "string", "minLength": 1 },
         "logLevel": { "type": "string", "enum": ["debug", "info", "warn", "error"] },
-        "trustedProxies": { "type": "string" }
+        "trustedProxies": {
+          "type": "string",
+          "description": "Comma separated CIDRs of trusted reverse proxies. A /0 range (0.0.0.0/0 or ::/0) is refused: it would trust X-Forwarded-For from any peer.",
+          "not": { "pattern": "/0+($|[,\\s])" }
+        }
       }
     },
     "umami": {

@@ -9,6 +9,9 @@ services:
       ADMIN_ADDR: ":8081"
       LOG_LEVEL: "debug"
       # Page view counting is off unless both are set, for example in .env.
+      # Under compose a visitor arrives from a private bridge address and no
+      # TRUSTED_PROXIES is set, so nothing is counted even with both set.
+      # That is deliberate: private clients are never counted.
       UMAMI_URL: "${UMAMI_URL:-}"
       UMAMI_WEBSITE_ID: "${UMAMI_WEBSITE_ID:-}"
     ports:

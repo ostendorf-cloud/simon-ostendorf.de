@@ -123,6 +123,11 @@ httpRoute:
     # listeners.
     sectionName: ""
 
+# The shutdown budget is about 28 seconds: 2 s readiness drain, up to 20 s for
+# the server to finish requests, up to 5 s to send queued page views and 1 s
+# of grace in govue's analytics Close. Keep this at 30 or more.
+terminationGracePeriodSeconds: 30
+
 resources:
   requests:
     cpu: 50m
