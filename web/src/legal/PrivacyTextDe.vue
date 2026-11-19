@@ -14,6 +14,7 @@ import { OPERATOR } from './operator'
           Seitenaufrufe werden auf dem Server gezählt, ohne ein Skript in Ihrem Browser. Wie das
           geht, steht unter 2.4.
         </li>
+        <li>Die Website wird auf eigener Hardware in Deutschland betrieben.</li>
       </ul>
     </section>
 
@@ -67,9 +68,9 @@ import { OPERATOR } from './operator'
       <div class="flex flex-col gap-3">
         <h3 class="text-lg font-semibold text-text">2.4 Zählung der Seitenaufrufe</h3>
         <p>
-          Seitenaufrufe werden auf dem Server mit Umami gezählt. Dafür läuft kein Skript in Ihrem
-          Browser, es wird kein Cookie gesetzt und nichts auf Ihrem Gerät gelesen oder gespeichert.
-          Gezählt wird, nachdem eine HTML-Seite erfolgreich ausgeliefert wurde.
+          Diese Website zählt Seitenaufrufe auf dem Server mit Umami. Dafür läuft kein Skript in
+          Ihrem Browser, es wird kein Cookie gesetzt und nichts auf Ihrem Gerät gelesen oder
+          gespeichert. Gezählt wird, nachdem eine HTML-Seite erfolgreich ausgeliefert wurde.
         </p>
         <p>An Umami werden folgende Angaben gesendet:</p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
@@ -98,8 +99,8 @@ import { OPERATOR } from './operator'
           <code>robots.txt</code> und <code>sitemap.xml</code>.
         </p>
         <p>
-          Die Zählung ist nur eingeschaltet, wenn für diese Website eine Umami-Instanz eingerichtet
-          ist. Ohne sie wird nichts gezählt und nichts gesendet.
+          Umami betreibe ich selbst auf eigener Hardware in Deutschland. Die Statistikdaten werden
+          nach 14 Monaten gelöscht.
         </p>
       </div>
 
@@ -108,6 +109,25 @@ import { OPERATOR } from './operator'
         <p>
           Wenn Sie mir schreiben oder anrufen, verarbeite ich Ihre Angaben und den Inhalt Ihrer
           Nachricht, um Ihre Anfrage zu beantworten.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <h3 class="text-lg font-semibold text-text">
+          2.6 Betrieb, Aufbewahrung und Rechtsgrundlage
+        </h3>
+        <p>
+          Diese Website wird auf eigener Hardware in Deutschland betrieben, bei mir zu Hause. Es
+          gibt keinen Hosting-Anbieter und keinen Auftragsverarbeiter für das Hosting.
+        </p>
+        <p>
+          Die Protokolle der Anwendung und des vorgeschalteten Ingress werden nach 30 Tagen
+          gelöscht. Die Statistikdaten von Umami werden nach 14 Monaten gelöscht.
+        </p>
+        <p>
+          Die Rechtsgrundlage für die Protokolle und für die Zählung der Seitenaufrufe ist Art. 6
+          Abs. 1 lit. f DSGVO. Ich habe ein berechtigtes Interesse an einem sicheren und stabilen
+          Betrieb der Website und an einer anonymen Messung ihrer Reichweite.
         </p>
       </div>
     </section>

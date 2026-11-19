@@ -18,6 +18,7 @@ import { OPERATOR } from './operator'
           Page views are counted on the server, without a script in your browser. How that works is
           described under 2.4.
         </li>
+        <li>The website is operated on my own hardware in Germany.</li>
       </ul>
     </section>
 
@@ -69,9 +70,9 @@ import { OPERATOR } from './operator'
       <div class="flex flex-col gap-3">
         <h3 class="text-lg font-semibold text-text">2.4 Counting page views</h3>
         <p>
-          Page views are counted on the server with Umami. No script runs in your browser, no cookie
-          is set and nothing is read from or stored on your device. A view is counted after an HTML
-          page was served successfully.
+          This website counts page views on the server with Umami. No script runs in your browser,
+          no cookie is set and nothing is read from or stored on your device. A view is counted
+          after an HTML page was served successfully.
         </p>
         <p>The following is sent to Umami:</p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
@@ -99,8 +100,8 @@ import { OPERATOR } from './operator'
           <code>robots.txt</code> and <code>sitemap.xml</code>.
         </p>
         <p>
-          Counting is only on when an Umami instance is set up for this website. Without one,
-          nothing is counted and nothing is sent.
+          I operate Umami myself on my own hardware in Germany. The statistics data is deleted after
+          14 months.
         </p>
       </div>
 
@@ -109,6 +110,23 @@ import { OPERATOR } from './operator'
         <p>
           If you write to me or call me, I process your details and the content of your message to
           answer your request.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <h3 class="text-lg font-semibold text-text">2.6 Operation, retention and legal basis</h3>
+        <p>
+          This website is operated on my own hardware in Germany, at my home. There is no hosting
+          provider and no processor for hosting.
+        </p>
+        <p>
+          The logs of the application and of the ingress in front of it are deleted after 30 days.
+          The statistics data in Umami is deleted after 14 months.
+        </p>
+        <p>
+          The legal basis for the logs and for counting page views is Art. 6(1)(f) GDPR. I have a
+          legitimate interest in the secure and stable operation of the website and in anonymous
+          measurement of its reach.
         </p>
       </div>
     </section>

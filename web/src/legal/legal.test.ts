@@ -78,6 +78,24 @@ describe.each(locales)('the %s privacy page', (locale) => {
   it('has no dispute resolution section', () => {
     expect(page().textContent ?? '').not.toMatch(disputeResolution)
   })
+
+  it('states own hardware, retention and the legal basis, and names no hosting provider', () => {
+    const text = page().textContent ?? ''
+    expect(text).toContain(locale === 'de' ? 'eigener Hardware' : 'own hardware')
+    expect(text).toContain('30')
+    expect(text).toContain('14')
+    expect(text).toMatch(
+      locale === 'de' ? /Art\. 6\s+Abs\. 1 lit\. f DSGVO/ : /Art\. 6\(1\)\(f\) GDPR/,
+    )
+    expect(text).not.toMatch(/hetzner|strato|ionos|ovh|aws|amazon/i)
+  })
+
+  it('no longer hedges the counting on a set up Umami instance', () => {
+    const text = page().textContent ?? ''
+    expect(text).not.toMatch(
+      /nur eingeschaltet|eingerichtet|only on when|set up for this website|Without one/i,
+    )
+  })
 })
 
 describe('the German and English texts', () => {

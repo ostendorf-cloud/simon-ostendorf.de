@@ -73,8 +73,10 @@
   dispute resolution section. The privacy page covers the controller, what the site itself
   stores (no cookie, the theme choice in local storage), the server side page view counting
   from the README's section "Page view counting", contact by e-mail or phone, the rights of
-  data subjects and the right to complain. Hosting, processors, retention and the legal basis
-  are not stated: no repository document backs them yet. The Instagram section does not
+  data subjects and the right to complain. Section 2.6 states the operator's facts: the site
+  runs on the owner's own hardware in Germany with no hosting provider and no processor for
+  hosting, logs are kept 30 days, Umami statistics 14 months, and the legal basis for logs and
+  counting is Art. 6(1)(f) GDPR. The Instagram section does not
   apply. Served at `/de/imprint`, `/en/imprint`, `/de/privacy` and `/en/privacy` with govue's
   redirects from `/imprint`, `/privacy` and the German aliases. No terms page: this site
   sells nothing.
