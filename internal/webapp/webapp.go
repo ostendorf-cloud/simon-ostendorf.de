@@ -44,6 +44,11 @@ type App struct {
 
 	// analytics is never nil after New; it is inert when counting is off.
 	analytics *analytics.Client
+	// accessLog writes one line per request: method, route pattern, status,
+	// bytes, duration and the resolved client address. No user agent, no
+	// referrer, never the raw path or query. The privacy text names these
+	// fields: change both together.
+	accessLog middleware.AccessLog
 	// closeTimeout bounds Close; a test shortens it.
 	closeTimeout time.Duration
 
@@ -74,14 +79,16 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 
 	registry := metrics.NewRegistry()
 
-	// Page view counting. The resolver trusts X-Forwarded-For only from the
-	// configured proxies, so a visitor behind the ingress is not mistaken for
-	// the ingress. The hostname reported is the public host from SITE_URL,
-	// never the request's Host header. A zero Config gives an inert client.
+	// Page view counting and the access log share one resolver. It trusts
+	// X-Forwarded-For only from the configured proxies, so a visitor behind
+	// the ingress is not mistaken for the ingress. The hostname reported is
+	// the public host from SITE_URL, never the request's Host header. A zero
+	// Config gives an inert client.
+	clientIPs := clientip.NewResolver(cfg.TrustedProxies)
 	views, err := analytics.New(cfg.Umami, analytics.Options{
 		Hostname: cfg.SiteURL.Hostname(),
 		Logger:   logger,
-		ClientIP: clientip.NewResolver(cfg.TrustedProxies),
+		ClientIP: clientIPs,
 		OnDrop: metrics.NewCounter(registry, "analytics_views_dropped_total",
 			"Page views lost to a full queue or a shutdown before they reached Umami."),
 	})
@@ -101,6 +108,7 @@ func New(cfg config.Config, logger *slog.Logger, dist, prerendered fs.FS) (*App,
 		pages:          pages,
 		siteURL:        cfg.SiteURL,
 		analytics:      views,
+		accessLog:      middleware.AccessLog{ClientIP: clientIPs},
 		closeTimeout:   analyticsCloseTimeout,
 		health:         health.New(),
 		metricsHandler: metrics.Handler(registry),
@@ -140,12 +148,12 @@ func (a *App) Health() *health.Registry {
 // Handler is the public handler: the SPA's static assets, the prerendered
 // page for every known route and locale, /robots.txt and /sitemap.xml,
 // and the catch-all document handler for the locale redirect, trailing
-// slash canonicalisation and the 404 page, wrapped in the two middlewares
-// worth keeping even for a handler with no session or form of its own. A
-// panic serving static files is still worth catching and still worth a
-// correlatable log line; everything else govue's middleware package
-// offers (security headers, access log, CORS, rate limiting) needs a
-// dependency or a decision this site does not have yet, see AGENTS.md.
+// slash canonicalisation and the 404 page, wrapped in panic recovery, a
+// request id and govue's access log (one line per request, route pattern
+// only, client address resolved behind the trusted proxies, no user agent).
+// Everything else govue's middleware package offers (security headers, CORS,
+// rate limiting) needs a dependency or a decision this site does not have
+// yet, see AGENTS.md.
 func (a *App) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/assets/", a.pages.assetHandler())
@@ -165,10 +173,13 @@ func (a *App) Handler() http.Handler {
 	// Analytics is innermost, directly around the mux: it reads the route
 	// pattern the mux sets, and RequestID replaces the request with
 	// WithContext, so any middleware between would hide the pattern. It is
-	// the mux itself when counting is off.
+	// the mux itself when counting is off. The access log sits outside it
+	// and inside RequestID, so its line carries the request id and, as
+	// analytics never replaces the request, still sees the route pattern.
 	return middleware.Chain(mux,
 		middleware.Recover(a.logger),
 		middleware.RequestID(a.logger),
+		a.accessLog.Middleware,
 		a.analytics.Middleware,
 	)
 }
