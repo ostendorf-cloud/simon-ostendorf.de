@@ -54,7 +54,34 @@
       "title": "CV",
       "description": "Simon Ostendorf's curriculum vitae."
     },
-    "heading": "CV"
+    "heading": "CV",
+    "lead": "Career, education, certificates and skills of Simon Ostendorf.",
+    "present": "present",
+    "grade": "Grade",
+    "issued": "issued",
+    "validUntil": "valid until",
+    "expired": "expired",
+    "pdf": {
+      "title": "Download as PDF",
+      "link": {
+        "de": "CV as PDF, German",
+        "en": "CV as PDF, English"
+      }
+    },
+    "sections": {
+      "experience": "Career",
+      "education": "Education",
+      "certificates": "Certificates",
+      "skills": "Skills",
+      "engagements": "Projects",
+      "languages": "Languages"
+    },
+    "levels": {
+      "familiar": "Familiar",
+      "working": "Working knowledge",
+      "proficient": "Proficient",
+      "expert": "Expert"
+    }
   },
   "contact": {
     "meta": {

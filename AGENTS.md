@@ -74,9 +74,10 @@ The global baseline already applies here and is not repeated below.
   locale redirect and the 404 route. `web/src/lib/seo.ts` resolves each route's title, meta
   description and hreflang alternates from the same table. `web/src/views` holds this
   milestone's five pages (home, cv, contact, imprint, privacy); the home page is the landing
-  page with two plain external links (ostendorf.dev, ostendorf.tech), cv and contact are
-  a heading and nothing else, their content is a separate issue, see "Scope of this
-  milestone" below. `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
+  page with two plain external links (ostendorf.dev, ostendorf.tech), the cv page is
+  described under "The CV data pipeline" below, contact is a heading and nothing else, its
+  content is a separate issue, see "Scope of this milestone" below.
+  `web/src/components/AppHeader.vue` and `AppFooter.vue` carry the navigation, the
   locale switch and the theme toggle. `web/scripts/prerender.ts` is the static site
   generation step `task prerender` runs, server-rendering every route of every locale into
   `cmd/website/prerendered`. `web/src/theme/simon-ostendorf-de.css` is this site's theme
@@ -99,6 +100,43 @@ Task always populates the frontend first. A bare `go build ./cmd/website` or
 `task build` or `task test:go` instead, or `task web:build && task prerender` once by hand
 before reaching for the Go toolchain directly.
 
+## The CV data pipeline
+
+`task content:build` runs `cmd/content` (`internal/content`). It downloads `cv.de.json`,
+`cv.en.json`, `cv.de.pdf` and `cv.en.pdf` from the cv repository's release named in
+`cv-release.env`, verifies them and writes `web/src/generated/cv.json` (the dataset) and the
+two PDFs. `web/src/lib/cv.ts` reads them through `import.meta.glob`; `CvView.vue` and
+`CvDocument.vue` render them. `web:build` depends on `content:build`, so every task that
+builds the frontend fetches first. Nothing runs at request time and the service makes no call.
+
+- The pin is `cv-release.env`, the same names as ostendorf.dev: `CV_RELEASE_TAG` (a version
+  tag such as `v0.1.0`, never `latest` or a branch) and the sha256 of each asset
+  (`CV_RELEASE_SHA256_DE`, `_EN`, `_PDF_DE`, `_PDF_EN`). The tag is not immutable, the digests
+  are the trust anchor: a mismatch, an empty digest next to a tag or an unset tag fails the
+  build. The values are empty until the owner pins a release, so every build fails with "no
+  cv release is pinned" until then, on purpose.
+- A cv release reaches this site only once this site rebuilds against it. The trigger is a
+  manual bump: download the four assets, run `sha256sum`, set all five values in one commit.
+  This is what ostendorf.dev does too. No Renovate manager covers `cv-release.env` and the cv
+  repository sends no dispatch, so nothing triggers a rebuild by itself.
+- `schema_version` is checked first. Only version 1 is read, any other fails the build with
+  the version and the fix. Unknown keys are ignored. The dataset keeps only what the page
+  shows: career, education, certificates, skills, engagements and languages. Contact data
+  (the postal address), references, projects and the LinkedIn parity sections are dropped.
+- Visibility: the cv concept document ("No visibility") removed the `public` marker, the cv
+  repository holds only public data and filters nothing. `ParseArtefact` still fails closed
+  on any object with a `visibility` other than `public` or a `public` other than true;
+  `TestNoNonPublicEntryCanAppear` feeds it such artefacts.
+- The PDF names `cv.<lang>.pdf` are this site's assumption: cv does not attach a PDF yet.
+  The PDFs are imported through Vite as content hashed files served from `/assets/`.
+- A certificate is expired once the current month is after its `valid_until` (`YYYY-MM`).
+  The prerendered HTML uses the build time, the mounted page the visitor's date.
+- Redirects follow at most 5 hops, to https and `ReleaseRedirectHosts` only. The CDN names
+  were not verified live: a refused redirect names the host to add.
+- `go build` and `go test` work without a release: the tests read
+  `internal/content/testdata/assets`, fixtures with fake data. `-asset-dir` makes
+  `cmd/content` read a directory instead (release `local`, no pin checked), for local work.
+
 ## govue's two halves move together
 
 govue releases a Go module and a Vue package under one tag. `go.mod`'s
@@ -120,13 +158,13 @@ task check
 
 The tooling, CI, the Helm chart, the container build, the bilingual page shell, the one route
 table and its prerendering are in place, and so are the imprint and privacy pages. Each of
-the two other pages the shell routes to (cv, contact) carries a heading and
-nothing else; the actual content is each its own issue and none of it is implemented yet:
+the other page the shell routes to (contact) carries a heading and nothing else; the
+actual content is its own issue and is not implemented yet:
 
 - Done: the landing page, a short page about the person with two clear ways on: development
   at ostendorf.dev, event technology at ostendorf.tech.
-- The CV as a page, rendered from the data the `cv` repository publishes, with the PDF offered
-  for download.
+- Done: the CV as a page, rendered from the data the `cv` repository publishes, with the PDF
+  offered for download. It builds only once the owner pins a cv release.
 - Contact, with a proof of work challenge and SMTP delivery.
 - Done: the imprint and privacy texts, this domain's own and written for what this site does
   today. The contact page will add a form and mail delivery: the privacy texts must grow with

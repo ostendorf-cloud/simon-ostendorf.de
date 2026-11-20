@@ -25,6 +25,12 @@ RUN pnpm install --frozen-lockfile
 
 COPY web/ ./
 
+# The CV page's dataset and PDFs are generated outside the image by "task
+# content:build", which needs the network. They arrive with "COPY web/" above.
+# Without them the prerender fails anyway, so refuse here with a clear message.
+RUN test -s src/generated/cv.json \
+    || { echo "web/src/generated/cv.json is missing: run task content:build first" >&2; exit 1; }
+
 # routeTable.ts reads internal/routes/routes.json straight through Vite's
 # JSON import, the same file the Go side embeds, so the frontend build needs
 # it on disk at the same relative path it has in the real repository tree

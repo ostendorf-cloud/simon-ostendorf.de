@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "language": "en",
+  "experience": [
+    {
+      "id": "exp-1",
+      "employer": "Example Employer",
+      "title": "Engineer",
+      "start": "2020-01",
+      "end": "2022-01",
+      "summary": "Summary one.",
+      "location": "Example City",
+      "employment_type": "Full-time"
+    },
+    {
+      "id": "exp-2",
+      "employer": "Other Employer",
+      "title": "Lead",
+      "start": "2022-02",
+      "end": null,
+      "summary": null,
+      "location": null,
+      "employment_type": null
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "institution": "Example University",
+      "degree": "Degree",
+      "start": "2015-10",
+      "end": "2019-06",
+      "summary": "Degree summary.",
+      "grade": "1.0"
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert-1",
+      "name": "Expired Certificate",
+      "issuer": "Example Body",
+      "issued": "2020-01",
+      "valid_until": "2023-01"
+    },
+    {
+      "id": "cert-2",
+      "name": "Lifetime Certificate",
+      "issuer": "Other Body",
+      "issued": "2021-05",
+      "valid_until": null
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-1",
+      "name": "Kubernetes",
+      "level": "expert",
+      "evidence": [{ "type": "certificate", "ref": "cert-2" }]
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "github_repo": "example/repo",
+      "description": "A project."
+    }
+  ],
+  "references": [{ "id": "ref-1", "name": "Dropped Person", "role": "Dropped" }],
+  "languages": [{ "id": "lang-1", "name": "English", "level": "proficient" }],
+  "contact": {
+    "email": "dropped@example.com",
+    "address": { "street": "Dropped Street 1", "city": "Dropped City" },
+    "profiles": []
+  },
+  "volunteering": [],
+  "awards": [],
+  "exam_results": [],
+  "courses": [],
+  "publications": [],
+  "patents": [],
+  "organisations": [],
+  "engagements": [
+    {
+      "id": "eng-1",
+      "experience": "exp-1",
+      "title": "Example Engagement",
+      "industry": "Example Industry",
+      "start": "2020-03",
+      "end": "2021",
+      "summary": "Engagement text."
+    }
+  ]
+}
