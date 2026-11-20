@@ -34,6 +34,13 @@ jobs:
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d  # v5.2.9
+
+      - name: Fetch the pinned cv release
+        # The only step that reaches the cv release. Public assets, no token.
+        # Only the generated files reach the image build context.
+        run: task content:build
+
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
 
       - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550  # v4.8.0

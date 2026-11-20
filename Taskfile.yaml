@@ -1,5 +1,9 @@
 version: "3"
 
+# CV_RELEASE_TAG and the four CV_RELEASE_SHA256_* digests, the pinned cv release
+# content:build reads and verifies.
+dotenv: [cv-release.env]
+
 tasks:
   setup:
     desc: Install the pinned toolchain
@@ -160,10 +164,29 @@ tasks:
     cmds:
       - pnpm run test
 
+  # Build time only: the one place the cv release is reached. The CV page needs
+  # its dataset and PDFs to build, so web:build depends on this and every task
+  # that builds the frontend fetches them first. It is skipped while
+  # cv-release.env and the output are unchanged. The release assets are public:
+  # no token is involved.
+  content:build:
+    desc: Fetch the pinned cv release, verify it, write the CV page's dataset and PDFs
+    sources:
+      - cv-release.env
+      - go.mod
+      - cmd/content/*.go
+      - internal/content/*.go
+    generates:
+      - web/src/generated/cv.json
+      - web/src/generated/cv.de.pdf
+      - web/src/generated/cv.en.pdf
+    cmds:
+      - go run ./cmd/content
+
   web:build:
     desc: Build the SPA bundle into cmd/website/dist
     dir: web
-    deps: [web:deps]
+    deps: [web:deps, content:build]
     cmds:
       - pnpm run build
 

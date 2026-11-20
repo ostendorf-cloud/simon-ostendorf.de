@@ -35,7 +35,13 @@
 - **CV data: build time, not runtime.** This site's CI pulls the cv repository's published
   JSON release artefact as a build input, the same shape `internal/depsync` already uses to
   pin and check a govue version. A new cv release reaches this site only once this site
-  rebuilds against it.
+  rebuilds against it. The pin is `cv-release.env`: a release tag plus the sha256 of the
+  four assets (`cv.de.json`, `cv.en.json`, `cv.de.pdf`, `cv.en.pdf`), the same file and
+  variable names ostendorf.dev uses. `task content:build` (`cmd/content`) downloads,
+  verifies, checks the artefact's `schema_version` (only version 1 is read, any other fails
+  the build) and writes `web/src/generated/`, which the Vue build and the prerender read.
+  The pin is bumped by hand, in one commit with all five values. Checked against the cv
+  concept document on 2026-11-20: the build time choice still holds.
   - Reason: this is a low traffic personal page, not a business-critical service. Adding a
     runtime dependency on the cv API service's uptime (`GET /api/v1/cv`) buys content that
     updates without a rebuild, at the cost of a second in-cluster dependency, a client with
@@ -54,13 +60,23 @@
   render cost this traffic level does not need, and the result would still go stale the
   moment the JSON does, since both come from the same cv release. Tied directly to the
   build-time choice above: whichever cadence applies to the JSON applies to the PDF.
-- **Visibility: filtered at the source, not in this site.** The public CV page and the
-  downloadable PDF only ever carry entries the cv data model marks public. An entry marked
-  non-public, such as a postal address or an NDA-bound client project, is never sent to this
-  site at all. Filtering happens in the cv repository's own release pipeline, before this
-  site ever reads the artefact, not as a client-side rule in this site's frontend: a browser's
-  developer tools can always see what the frontend received, so a field that must never reach
-  a visitor must never be sent in the first place.
+  The PDF reaches the visitor as a content hashed file under `/assets/`, one per language,
+  linked with the language named in the link text. Status on 2026-11-20: the cv concept
+  document says the PDF attaches to the release, but its release script attaches only the two
+  JSON files and `cv render pdf` does not exist yet. This site assumes the names
+  `cv.de.pdf` and `cv.en.pdf`, mirroring the JSON names, and fails the build without them.
+- **Visibility: no marker, the cv repository holds only public data.** An earlier version of
+  this document, and the issue for the CV page, assumed the cv data model marks entries
+  `public` and the release pipeline filters. That changed: the cv concept document's "No
+  visibility" section removed the field, because the cv repository is public and every entry
+  in it already is. Nothing is filtered upstream and nothing needs filtering here. A postal
+  address or an NDA-bound client project is not in the cv data at all (engagements are
+  anonymised). This site still fails closed: the build refuses an artefact in which any
+  entry carries a `visibility` other than `public` or `public: false`, which would mean the
+  cv schema grew a marker this site does not understand. The page also drops, at build
+  time, every section it does not show: the contact data (the postal address among it),
+  references, projects (the GitHub list belongs to ostendorf.dev) and the LinkedIn parity
+  sections.
 - **Prerendering: yes, following ostendorf.tech's pattern.** A build step renders every route
   to static HTML (`task prerender`-equivalent), embedded into the binary and served ahead of
   the SPA, with a route table and a test proving every table entry has a matching prerendered
@@ -104,21 +120,20 @@
   JSON and the PDF share one source.
 - **Client-side filtering of a full, unfiltered cv payload.** Dropped: relies on the frontend
   never rendering a field it was never supposed to show, which a browser's own developer
-  tools defeat trivially; the cv data model's visibility marker exists specifically to avoid
-  this.
+  tools defeat trivially. The cv repository now holds only public data, so there is nothing
+  to filter.
 - **Redirect this domain to ostendorf.tech or ostendorf.dev.** Dropped before this document:
   the domain carries the person's own name, and neither sibling brand should absorb it.
 
 ## Open questions
 
-- How does a cv release actually trigger a rebuild here: a manual bump, a Renovate-style
-  version bump pull request, or a repository dispatch from the cv repository. Owner: decide
-  once the cv repository's release automation is confirmed.
-- Does the cv repository's published JSON release artefact already exclude non-public entries,
-  or does only its live API filter them. Owner: confirm with the cv repository's maintainer
-  before this site's build step is written.
-- Does the cv repository's release actually publish a PDF artefact, or only render one on
-  demand through its own API. Owner: confirm with the cv repository's maintainer.
+- How does a cv release trigger a rebuild here. Decided for now: a manual bump of
+  `cv-release.env`, like ostendorf.dev. No Renovate manager covers the file and cv sends no
+  repository dispatch. Owner: revisit if cv adds a dispatch or a Renovate custom manager
+  for the pin.
+- Settled: the cv JSON artefact needs no filtering, see "Visibility" above.
+- Open: the cv release carries no PDF yet. Owner: the cv repository's maintainer, to attach
+  `cv.de.pdf` and `cv.en.pdf` (or tell this site other names) before the first pin.
 - One locale or two. ostendorf.tech runs German and English through a shared route table;
   this site currently has no router or i18n setup at all. Owner: decide before the route
   table and prerender step are built.

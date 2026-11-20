@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "experience": [
+    {
+      "id": "exp-1",
+      "employer": "Beispiel Arbeitgeber",
+      "title": "Ingenieur",
+      "start": "2020-01",
+      "end": "2022-01",
+      "summary": "Zusammenfassung eins.",
+      "location": "Beispielstadt",
+      "employment_type": "Vollzeit"
+    },
+    {
+      "id": "exp-2",
+      "employer": "Anderer Arbeitgeber",
+      "title": "Leitung",
+      "start": "2022-02",
+      "end": null,
+      "summary": null,
+      "location": null,
+      "employment_type": null
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "institution": "Beispiel Universitaet",
+      "degree": "Abschluss",
+      "start": "2015-10",
+      "end": "2019-06",
+      "summary": "Zusammenfassung des Abschlusses.",
+      "grade": "1,0"
+    }
+  ],
+  "certificates": [
+    {
+      "id": "cert-1",
+      "name": "Abgelaufenes Zertifikat",
+      "issuer": "Beispielstelle",
+      "issued": "2020-01",
+      "valid_until": "2023-01"
+    },
+    {
+      "id": "cert-2",
+      "name": "Unbefristetes Zertifikat",
+      "issuer": "Andere Stelle",
+      "issued": "2021-05",
+      "valid_until": null
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-1",
+      "name": "Kubernetes",
+      "level": "expert",
+      "evidence": [{ "type": "certificate", "ref": "cert-2" }]
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "github_repo": "example/repo",
+      "description": "Ein Projekt."
+    }
+  ],
+  "references": [{ "id": "ref-1", "name": "Entfallene Person", "role": "Entfallen" }],
+  "languages": [{ "id": "lang-1", "name": "Englisch", "level": "proficient" }],
+  "contact": {
+    "email": "dropped@example.com",
+    "address": { "street": "Entfallene Strasse 1", "city": "Entfallene Stadt" },
+    "profiles": []
+  },
+  "volunteering": [],
+  "awards": [],
+  "exam_results": [],
+  "courses": [],
+  "publications": [],
+  "patents": [],
+  "organisations": [],
+  "engagements": [
+    {
+      "id": "eng-1",
+      "experience": "exp-1",
+      "title": "Beispiel Einsatz",
+      "industry": "Beispiel Branche",
+      "start": "2020-03",
+      "end": "2021",
+      "summary": "Einsatztext."
+    }
+  ]
+}

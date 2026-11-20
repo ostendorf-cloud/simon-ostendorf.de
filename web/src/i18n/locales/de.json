@@ -54,7 +54,34 @@
       "title": "Lebenslauf",
       "description": "Der Lebenslauf von Simon Ostendorf."
     },
-    "heading": "Lebenslauf"
+    "heading": "Lebenslauf",
+    "lead": "Werdegang, Ausbildung, Zertifikate und Fähigkeiten von Simon Ostendorf.",
+    "present": "heute",
+    "grade": "Note",
+    "issued": "ausgestellt",
+    "validUntil": "gültig bis",
+    "expired": "abgelaufen",
+    "pdf": {
+      "title": "Als PDF herunterladen",
+      "link": {
+        "de": "Lebenslauf als PDF, Deutsch",
+        "en": "Lebenslauf als PDF, Englisch"
+      }
+    },
+    "sections": {
+      "experience": "Werdegang",
+      "education": "Ausbildung",
+      "certificates": "Zertifikate",
+      "skills": "Fähigkeiten",
+      "engagements": "Projekte",
+      "languages": "Sprachen"
+    },
+    "levels": {
+      "familiar": "Grundkenntnisse",
+      "working": "Gute Kenntnisse",
+      "proficient": "Sehr gute Kenntnisse",
+      "expert": "Experte"
+    }
   },
   "contact": {
     "meta": {
