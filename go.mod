@@ -2,7 +2,7 @@ module github.com/ostendorf-cloud/simon-ostendorf.de
 
 go 1.27
 
-require github.com/ostendorf-cloud/govue v0.5.0
+require github.com/ostendorf-cloud/govue v0.6.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
