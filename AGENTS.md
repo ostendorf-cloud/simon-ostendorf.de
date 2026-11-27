@@ -66,6 +66,8 @@ The global baseline already applies here and is not repeated below.
   change the privacy texts in both languages in the same pull request.
 - `internal/depsync` checks that `go.mod` and `web/package.json` pin the same govue version,
   and that `web/pnpm-lock.yaml` still resolves govue's Vue package to its `/web` subdirectory.
+  It also checks the Dockerfile's pnpm pin against `mise.toml` and the Renovate rules that
+  group the pnpm pins and hold `typescript` below 7.
 - `web/` is the Vue SPA, consuming govue's Vue package as a pnpm git dependency. `web/src/i18n`
   holds the German and English message catalogues (German is the source of truth; English
   falls back to German for any key not yet translated) and `web/src/i18n/locales.test.ts`
@@ -112,7 +114,10 @@ Renovate proposes both halves as one pull request. `renovate.json` has a regex m
 the pnpm git dependency, which Renovate's npm manager skips. One rule groups both halves as
 `govue`. The shared `govue-lockfile` preset updates `web/pnpm-lock.yaml`. The rule's
 `constraints.pnpm` must equal the pnpm pin in `mise.toml`, and `internal/depsync` tests it.
-A second rule groups both pnpm pins as `pnpm`, so they move in one pull request.
+A second rule groups the three pnpm pins as `pnpm`, so they move in one pull request: the
+`mise.toml` pin, the Dockerfile's `ARG PNPM_VERSION` (a regex manager reads it) and the govue
+rule's `constraints.pnpm`. `TestDockerfilePnpmMatchesMise` fails when the Dockerfile and
+`mise.toml` differ.
 
 ## Verify before committing
 

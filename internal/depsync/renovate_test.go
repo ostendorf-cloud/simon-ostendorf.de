@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -25,6 +26,8 @@ type renovateConfig struct {
 		MatchManagers     []string          `json:"matchManagers"`
 		GroupName         string            `json:"groupName"`
 		Constraints       map[string]string `json:"constraints"`
+		AllowedVersions   string            `json:"allowedVersions"`
+		Description       string            `json:"description"`
 	} `json:"packageRules"`
 }
 
@@ -56,6 +59,81 @@ func misePnpm(t *testing.T) string {
 		t.Fatal(`mise.toml has no 'pnpm = "<version>"' line`)
 	}
 	return pin[1]
+}
+
+var (
+	// dockerfilePnpm is the version argument Renovate updates. dockerfileCorepack is the one
+	// install line, which must take that argument and carry no literal version.
+	dockerfilePnpm     = regexp.MustCompile(`(?m)^ARG PNPM_VERSION=(\S+)$`)
+	dockerfileCorepack = regexp.MustCompile(`corepack prepare (\S+) --activate`)
+)
+
+// TestDockerfilePnpmMatchesMise fails when the Dockerfile's frontend stage installs a
+// different pnpm than mise.toml pins. The lockfile the image reads with --frozen-lockfile
+// has to come from the same pnpm a local install uses.
+func TestDockerfilePnpmMatchesMise(t *testing.T) {
+	t.Parallel()
+
+	docker, err := os.ReadFile("../../Dockerfile")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d := dockerfilePnpm.FindStringSubmatch(string(docker))
+	if d == nil {
+		t.Fatal("Dockerfile has no 'ARG PNPM_VERSION=<version>' line")
+	}
+	installs := dockerfileCorepack.FindAllStringSubmatch(string(docker), -1)
+	if len(installs) != 1 || installs[0][1] != `"pnpm@${PNPM_VERSION}"` {
+		t.Fatalf(`Dockerfile must install pnpm once, as corepack prepare "pnpm@${PNPM_VERSION}" --activate, got %q`, installs)
+	}
+	if pin := misePnpm(t); d[1] != pin {
+		t.Fatalf("Dockerfile installs pnpm %s but mise.toml pins pnpm %s; they must match", d[1], pin)
+	}
+}
+
+// TestRenovateReadsTheDockerfilePnpm fails when no regex manager of renovate.json matches
+// the Dockerfile's PNPM_VERSION argument and extracts the npm datasource, the depName pnpm
+// and the version mise.toml pins. Renovate's named group syntax, (?<name>...), is also Go's.
+func TestRenovateReadsTheDockerfilePnpm(t *testing.T) {
+	t.Parallel()
+
+	docker, err := os.ReadFile("../../Dockerfile")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pin := misePnpm(t)
+
+	found := false
+	for _, m := range readRenovateConfig(t).CustomManagers {
+		if m.CustomType != "regex" || !slices.Contains(m.ManagerFilePatterns, "/^Dockerfile$/") {
+			continue
+		}
+		for _, s := range m.MatchStrings {
+			re, err := regexp.Compile(s)
+			if err != nil {
+				t.Fatalf("matchString %q does not compile: %v", s, err)
+			}
+			got := re.FindStringSubmatch(string(docker))
+			if got == nil {
+				continue
+			}
+			named := map[string]string{}
+			for i, name := range re.SubexpNames() {
+				if name != "" {
+					named[name] = got[i]
+				}
+			}
+			if named["datasource"] != "npm" || named["depName"] != "pnpm" || named["currentValue"] != pin {
+				t.Errorf("the Dockerfile manager extracts %v, want datasource npm, depName pnpm, version %s",
+					named, pin)
+			}
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("no regex manager of renovate.json matches the Dockerfile's PNPM_VERSION argument")
+	}
 }
 
 // TestRenovateGroupsGovueHalves fails when renovate.json no longer puts the Go module and
@@ -175,7 +253,7 @@ func TestRenovateGroupsPnpmPins(t *testing.T) {
 		if !slices.Contains(rule.MatchPackageNames, "pnpm") {
 			continue
 		}
-		for _, manager := range []string{"mise", "renovate-config"} {
+		for _, manager := range []string{"mise", "custom.regex", "renovate-config"} {
 			if !slices.Contains(rule.MatchManagers, manager) {
 				t.Fatalf("the pnpm rule matches managers %v, want %q among them", rule.MatchManagers, manager)
 			}
@@ -186,4 +264,28 @@ func TestRenovateGroupsPnpmPins(t *testing.T) {
 		return
 	}
 	t.Fatal(`renovate.json has no package rule matching package name "pnpm"`)
+}
+
+// TestRenovateHoldsTypescriptBelowSeven fails when renovate.json loses the typescript
+// package rule or changes its range. typescript-eslint and vue-tsc do not support
+// TypeScript 7 yet, so a major bump pull request would break the web build. The rule's
+// description has to say when to remove it.
+func TestRenovateHoldsTypescriptBelowSeven(t *testing.T) {
+	t.Parallel()
+
+	for _, rule := range readRenovateConfig(t).PackageRules {
+		if !slices.Contains(rule.MatchPackageNames, "typescript") {
+			continue
+		}
+		if rule.AllowedVersions != "<7" {
+			t.Fatalf("typescript rule allowedVersions = %q, want %q", rule.AllowedVersions, "<7")
+		}
+		for _, want := range []string{"typescript-eslint", "vue-tsc", "Remove this rule"} {
+			if !strings.Contains(rule.Description, want) {
+				t.Errorf("typescript rule description does not mention %q: %q", want, rule.Description)
+			}
+		}
+		return
+	}
+	t.Fatal(`renovate.json has no package rule matching package name "typescript"`)
 }
