@@ -108,6 +108,11 @@ of a govue release and not the other half, silently. `task check:govue-version`
 (`internal/depsync`) enforces this; see that package for the detail, including a real pnpm bug
 (pnpm/pnpm#12304) it also guards against.
 
+Renovate proposes both halves as one pull request. `renovate.json` has a regex manager for
+the pnpm git dependency, which Renovate's npm manager skips. One rule groups both halves as
+`govue`. The shared `govue-lockfile` preset updates `web/pnpm-lock.yaml`. The rule's
+`constraints.pnpm` must equal the pnpm pin in `mise.toml`, and `internal/depsync` tests it.
+
 ## Verify before committing
 
 ```sh
