@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -25,6 +26,8 @@ type renovateConfig struct {
 		MatchManagers     []string          `json:"matchManagers"`
 		GroupName         string            `json:"groupName"`
 		Constraints       map[string]string `json:"constraints"`
+		AllowedVersions   string            `json:"allowedVersions"`
+		Description       string            `json:"description"`
 	} `json:"packageRules"`
 }
 
@@ -261,4 +264,28 @@ func TestRenovateGroupsPnpmPins(t *testing.T) {
 		return
 	}
 	t.Fatal(`renovate.json has no package rule matching package name "pnpm"`)
+}
+
+// TestRenovateHoldsTypescriptBelowSeven fails when renovate.json loses the typescript
+// package rule or changes its range. typescript-eslint and vue-tsc do not support
+// TypeScript 7 yet, so a major bump pull request would break the web build. The rule's
+// description has to say when to remove it.
+func TestRenovateHoldsTypescriptBelowSeven(t *testing.T) {
+	t.Parallel()
+
+	for _, rule := range readRenovateConfig(t).PackageRules {
+		if !slices.Contains(rule.MatchPackageNames, "typescript") {
+			continue
+		}
+		if rule.AllowedVersions != "<7" {
+			t.Fatalf("typescript rule allowedVersions = %q, want %q", rule.AllowedVersions, "<7")
+		}
+		for _, want := range []string{"typescript-eslint", "vue-tsc", "Remove this rule"} {
+			if !strings.Contains(rule.Description, want) {
+				t.Errorf("typescript rule description does not mention %q: %q", want, rule.Description)
+			}
+		}
+		return
+	}
+	t.Fatal(`renovate.json has no package rule matching package name "typescript"`)
 }
