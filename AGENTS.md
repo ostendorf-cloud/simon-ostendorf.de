@@ -112,6 +112,7 @@ Renovate proposes both halves as one pull request. `renovate.json` has a regex m
 the pnpm git dependency, which Renovate's npm manager skips. One rule groups both halves as
 `govue`. The shared `govue-lockfile` preset updates `web/pnpm-lock.yaml`. The rule's
 `constraints.pnpm` must equal the pnpm pin in `mise.toml`, and `internal/depsync` tests it.
+A second rule groups both pnpm pins as `pnpm`, so they move in one pull request.
 
 ## Verify before committing
 
