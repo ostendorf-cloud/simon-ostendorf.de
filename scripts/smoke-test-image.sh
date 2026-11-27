@@ -91,8 +91,13 @@ assert_status "/" "302"
 # served directly at /: checking the status alone would also pass a
 # redirect to the wrong place, so this checks where / actually sends a
 # visitor, not just that it sends them somewhere.
+#
+# redirect_url is the absolute URL curl resolves Location to, so the match
+# is anchored at both ends on the expected host. An end-only match such as
+# /(de|en)/$ would also accept /foo/de/ or the same path on another host.
+# Do not loosen it.
 location="$(curl --silent --output /dev/null --write-out '%{redirect_url}' "${base_url}/")" || location=""
-if [[ ! $location =~ /(de|en)/$ ]]; then
+if [[ $location != "${base_url}/de/" && $location != "${base_url}/en/" ]]; then
   echo "GET ${base_url}/: want redirect to a locale path, got Location \"${location}\"" >&2
   fail=1
 fi
