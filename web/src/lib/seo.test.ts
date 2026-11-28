@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { routeTable } from './routeTable'
-import { canonical, descriptionKeys, NOT_FOUND, path, titleKeys } from './seo'
+import { canonical, descriptionKeys, hreflangAlternates, NOT_FOUND, path, titleKeys } from './seo'
 
 // titleKeys and descriptionKeys are kept separate from routes.json
 // deliberately (see seo.ts), which only stays safe as long as this test
@@ -82,5 +82,14 @@ describe('path and canonical', () => {
 
   it('builds a canonical URL for the 404 page without throwing', () => {
     expect(() => canonical('en', NOT_FOUND)).not.toThrow()
+  })
+})
+
+describe('hreflangAlternates', () => {
+  it('points x-default at the English page, the site default', () => {
+    const alternates = hreflangAlternates('imprint')
+    expect(alternates.find((a) => a.hreflang === 'x-default')?.href).toBe(
+      'https://simon-ostendorf.de/en/imprint',
+    )
   })
 })

@@ -20,7 +20,13 @@ import { createMemoryHistory } from 'vue-router'
 import { useTheme } from '@ostendorf-cloud/govue'
 
 import App from '../src/App.vue'
-import { createAppI18n, installI18n, SUPPORTED_LOCALES, type Locale } from '../src/i18n'
+import {
+  createAppI18n,
+  DEFAULT_LOCALE,
+  installI18n,
+  SUPPORTED_LOCALES,
+  type Locale,
+} from '../src/i18n'
 import { pagePath, routeTable, type RouteEntry } from '../src/lib/routeTable'
 import {
   canonical,
@@ -212,7 +218,7 @@ function sitemapXml(): string {
         )
       }
       lines.push(
-        `    <xhtml:link rel="alternate" hreflang="x-default" href="${routeUrl('de', entry)}"/>`,
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${routeUrl(DEFAULT_LOCALE, entry)}"/>`,
         '  </url>',
       )
     }

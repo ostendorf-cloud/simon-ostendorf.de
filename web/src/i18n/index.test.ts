@@ -28,9 +28,9 @@ describe('createAppI18n', () => {
     expect(i18n.global.t('onlyInGerman.greeting')).not.toBe('onlyInGerman.greeting')
   })
 
-  it('defaults to German', () => {
+  it('defaults to English, the site default', () => {
     const i18n = createAppI18n()
-    expect(i18n.global.locale.value).toBe('de')
+    expect(i18n.global.locale.value).toBe('en')
   })
 })
 
@@ -47,15 +47,19 @@ describe('isLocale', () => {
 })
 
 describe('detectPreferredLocale', () => {
+  it('picks German when it is the highest ranked language', () => {
+    expect(detectPreferredLocale(['de-AT', 'en'])).toBe('de')
+  })
+
   it('picks English when it is the highest ranked language', () => {
     expect(detectPreferredLocale(['en-US', 'de'])).toBe('en')
   })
 
-  it('falls back to German for an unsupported language', () => {
-    expect(detectPreferredLocale(['fr-FR'])).toBe('de')
+  it('falls back to English for an unsupported language', () => {
+    expect(detectPreferredLocale(['fr-FR'])).toBe('en')
   })
 
-  it('falls back to German when there is no language at all', () => {
-    expect(detectPreferredLocale([])).toBe('de')
+  it('falls back to English when there is no language at all', () => {
+    expect(detectPreferredLocale([])).toBe('en')
   })
 })

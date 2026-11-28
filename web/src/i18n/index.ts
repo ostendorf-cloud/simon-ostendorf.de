@@ -5,25 +5,31 @@ import { createGovueI18n } from '@ostendorf-cloud/govue'
 import de from './locales/de.json'
 import en from './locales/en.json'
 
-/** The only two locales this site serves. German is the source of truth. */
+/** The only two locales this site serves. German is the source of truth
+ *  for the message catalogues. */
 export const SUPPORTED_LOCALES = ['de', 'en'] as const
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
-export const DEFAULT_LOCALE: Locale = 'de'
+/** The site default: where "/" lands without an Accept-Language match, and
+ *  the x-default of every hreflang set. It is English, and the server's
+ *  language configuration (cmd/frontend) names the same one. */
+export const DEFAULT_LOCALE: Locale = 'en'
+/** The locale every message exists in, the fallback of the other one. */
+export const SOURCE_LOCALE: Locale = 'de'
 
 export function isLocale(value: string): value is Locale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
 
 /**
- * detectPreferredLocale picks English when it is the visitor's highest
- * weighted browser language, German otherwise. This mirrors the server's
- * own Accept-Language based redirect at "/", for the rare client-side
- * navigation that reaches it instead, for example during local
- * development or a direct in-app link to "/".
+ * detectPreferredLocale picks German when it is the visitor's highest
+ * weighted browser language, the site default (English) otherwise. This
+ * mirrors the server's own Accept-Language based redirect at "/", for the
+ * rare client-side navigation that reaches it instead, for example during
+ * local development or a direct in-app link to "/".
  */
 export function detectPreferredLocale(languages: readonly string[]): Locale {
   const primary = languages[0]?.split('-')[0]?.toLowerCase()
-  return primary === 'en' ? 'en' : DEFAULT_LOCALE
+  return primary === 'de' ? 'de' : DEFAULT_LOCALE
 }
 
 /**
@@ -56,7 +62,7 @@ export function createAppI18n(locale: Locale = DEFAULT_LOCALE) {
   return createI18n({
     legacy: false,
     locale,
-    fallbackLocale: DEFAULT_LOCALE,
+    fallbackLocale: SOURCE_LOCALE,
     missingWarn: true,
     fallbackWarn: false,
     messages: { de, en },

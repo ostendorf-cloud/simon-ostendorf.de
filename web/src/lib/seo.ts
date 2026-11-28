@@ -1,5 +1,5 @@
 import type { Locale } from '../i18n'
-import { SUPPORTED_LOCALES } from '../i18n'
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../i18n'
 import { pagePath, routeTable } from './routeTable'
 
 /** The site's canonical origin, fixed at build time: the pages, sitemap.xml
@@ -101,13 +101,13 @@ export function fullTitle(route: PageRoute, meta: PageMeta, siteName: string): s
 }
 
 /** hreflangAlternates lists every locale's canonical URL for route, plus
- *  the x-default entry pointing at German, this site's own default when a
- *  visitor's language is not one this site has a dedicated version for. */
+ *  the x-default entry pointing at the site default (English), for a
+ *  visitor whose language is not one this site has a version for. */
 export function hreflangAlternates(route: PageRoute): Array<{ hreflang: string; href: string }> {
   const alternates: Array<{ hreflang: string; href: string }> = SUPPORTED_LOCALES.map((locale) => ({
     hreflang: locale,
     href: canonical(locale, route),
   }))
-  alternates.push({ hreflang: 'x-default', href: canonical('de', route) })
+  alternates.push({ hreflang: 'x-default', href: canonical(DEFAULT_LOCALE, route) })
   return alternates
 }
