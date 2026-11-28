@@ -208,6 +208,22 @@ tasks:
       - task: check:govue-version
       - task: test:routes
 
+  # The PNG files are generated output and committed, never edited by hand. Run it again
+  # whenever web/public/favicon.svg changes. Follows govue's favicon:generate, same file
+  # names and same flags, which govue's frontend package requires at the root of the build.
+  favicon:generate:
+    desc: Generate the favicon PNG files from web/public/favicon.svg
+    dir: web
+    cmds:
+      - >-
+        magick -background none -density 1200 public/favicon.svg -resize 32x32
+        -depth 8 -strip -define png:exclude-chunks=date,time public/favicon-32x32.png
+      # The touch icon is opaque: iOS fills transparent pixels with black.
+      - >-
+        magick -background white -density 1200 public/favicon.svg -resize 180x180
+        -alpha remove -alpha off -depth 8 -strip -define png:exclude-chunks=date,time
+        public/apple-touch-icon.png
+
   fmt:
     desc: Format Go code
     cmds:
