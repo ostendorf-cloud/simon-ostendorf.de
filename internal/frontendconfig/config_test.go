@@ -1,4 +1,4 @@
-package config
+package frontendconfig
 
 import (
 	"log/slog"
@@ -35,6 +35,12 @@ func TestLoadAppliesDefaultsWhenEverythingIsUnset(t *testing.T) {
 	if cfg.LogLevel != slog.LevelInfo {
 		t.Errorf("LogLevel = %v, want %v", cfg.LogLevel, slog.LevelInfo)
 	}
+	if cfg.AllowPlainHTTP {
+		t.Error("AllowPlainHTTP is on by default")
+	}
+	if cfg.DevAPIProxy != "" || cfg.Development() {
+		t.Errorf("DevAPIProxy = %q, Development() = %v, want both off", cfg.DevAPIProxy, cfg.Development())
+	}
 }
 
 func TestLoadOverridesEachVariable(t *testing.T) {
@@ -69,6 +75,24 @@ func TestLoadOverridesEachVariable(t *testing.T) {
 			check: func(t *testing.T, cfg Config) {
 				if cfg.SiteURL.String() != "https://example.test" {
 					t.Errorf("SiteURL = %q, want %q", cfg.SiteURL, "https://example.test")
+				}
+			},
+		},
+		{
+			name: "ALLOW_PLAIN_HTTP",
+			env:  map[string]string{"ALLOW_PLAIN_HTTP": "true"},
+			check: func(t *testing.T, cfg Config) {
+				if !cfg.AllowPlainHTTP {
+					t.Error("AllowPlainHTTP = false, want true")
+				}
+			},
+		},
+		{
+			name: "FRONTEND_DEV_API_PROXY",
+			env:  map[string]string{"FRONTEND_DEV_API_PROXY": "http://api:8080"},
+			check: func(t *testing.T, cfg Config) {
+				if cfg.DevAPIProxy != "http://api:8080" || !cfg.Development() {
+					t.Errorf("DevAPIProxy = %q, Development() = %v", cfg.DevAPIProxy, cfg.Development())
 				}
 			},
 		},
@@ -163,8 +187,8 @@ func TestLoadRejectsAnInvalidLogLevel(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load() error = nil, want an error for an invalid LOG_LEVEL")
 	}
-	if !strings.Contains(err.Error(), "config:") {
-		t.Errorf("Load() error = %q, want it wrapped with \"config:\"", err.Error())
+	if !strings.Contains(err.Error(), "frontendconfig:") {
+		t.Errorf("Load() error = %q, want it wrapped with \"frontendconfig:\"", err.Error())
 	}
 	if !strings.Contains(err.Error(), "verbose") {
 		t.Errorf("Load() error = %q, want it to name the invalid value", err.Error())
