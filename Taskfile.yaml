@@ -17,8 +17,8 @@ tasks:
     cmds:
       - golangci-lint config verify
 
-  # Both targets typecheck cmd/website, whose go:embed patterns fail on an empty
-  # dist/ or prerendered/, so the frontend has to exist before either one runs.
+  # Both targets typecheck cmd/frontend, whose go:embed pattern fails on an empty
+  # dist/, so the frontend has to exist before either one runs.
   lint:vet:
     desc: Go vet
     deps: [web:build, prerender]
@@ -95,10 +95,23 @@ tasks:
       - helm unittest charts/simon-ostendorf.de
 
   build:
-    desc: Compile the website binary
+    desc: Compile both binaries, the frontend and the API
+    cmds:
+      - task: build:frontend
+      - task: build:api
+
+  build:frontend:
+    desc: Compile the frontend binary, with the built site embedded
     deps: [web:build, prerender]
     cmds:
-      - go build -o bin/website ./cmd/website
+      - go build -o bin/frontend ./cmd/frontend
+
+  # The API embeds nothing, on purpose: no frontend dependency. cmd/api's own
+  # test fails when it gains a go:embed directive.
+  build:api:
+    desc: Compile the API binary, which embeds no frontend
+    cmds:
+      - go build -o bin/api ./cmd/api
 
   test:go:
     desc: Go test
@@ -115,7 +128,7 @@ tasks:
     desc: Route table conformance, the prerendered output against internal/routes' embedded table
     deps: [web:build, prerender]
     cmds:
-      - go test -race -count=1 -run TestPrerenderedOutputMatchesRouteTable ./cmd/website/...
+      - go test -race -count=1 -run TestPrerenderedOutputMatchesRouteTable ./cmd/frontend/...
 
   # "task prerender" already ends with this check, so no build ships without it. This
   # target is the one CI's legal job runs: prerendering is the check, with its inputs.
@@ -161,8 +174,9 @@ tasks:
       - pnpm run test
 
   web:build:
-    desc: Build the SPA bundle into cmd/website/dist
+    desc: Build the SPA bundle into cmd/frontend/dist
     dir: web
+    run: once
     deps: [web:deps]
     cmds:
       - pnpm run build
@@ -175,8 +189,9 @@ tasks:
       - pnpm run format
 
   prerender:
-    desc: Render every route of every locale to static HTML into cmd/website/prerendered
+    desc: Render every route of every locale to static HTML into cmd/frontend/dist
     dir: web
+    run: once
     deps: [web:build]
     cmds:
       - pnpm run prerender
@@ -203,10 +218,27 @@ tasks:
       - task: web:test
       - task: web:build
       - task: prerender
-      - task: build
+      - task: build:frontend
+      - task: build:api
       - task: test:go
       - task: check:govue-version
       - task: test:routes
+
+  # The PNG files are generated output and committed, never edited by hand. Run it again
+  # whenever web/public/favicon.svg changes. Follows govue's favicon:generate, same file
+  # names and same flags, which govue's frontend package requires at the root of the build.
+  favicon:generate:
+    desc: Generate the favicon PNG files from web/public/favicon.svg
+    dir: web
+    cmds:
+      - >-
+        magick -background none -density 1200 public/favicon.svg -resize 32x32
+        -depth 8 -strip -define png:exclude-chunks=date,time public/favicon-32x32.png
+      # The touch icon is opaque: iOS fills transparent pixels with black.
+      - >-
+        magick -background white -density 1200 public/favicon.svg -resize 180x180
+        -alpha remove -alpha off -depth 8 -strip -define png:exclude-chunks=date,time
+        public/apple-touch-icon.png
 
   fmt:
     desc: Format Go code

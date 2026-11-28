@@ -27,6 +27,9 @@ shfmt = "3"
 # charts/simon-ostendorf.de targets Helm 3's plugin API.
 helm = "4.3.2"
 kubeconform = "0.8.0"
+# Renders the favicon PNG files from web/public/favicon.svg (task favicon:generate). Pinned
+# to the patch because the output bytes are committed and another version would rewrite them.
+imagemagick = "7.1.2_31"
 
 # helm-unittest (charts/simon-ostendorf.de's own verification plugin) is a Helm plugin, not a
 # conventional CLI, and the baseline forbids "helm plugin install <url>" regardless of Helm

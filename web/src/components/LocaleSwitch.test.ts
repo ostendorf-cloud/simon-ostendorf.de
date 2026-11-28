@@ -17,15 +17,16 @@ async function switchHref(name: string, from: 'de' | 'en'): Promise<string | nul
 }
 
 describe('LocaleSwitch', () => {
-  // A legal page's canonical path has no trailing slash. A link with one
-  // would be a 301 on every language switch.
-  it('links the other language of a legal page without a trailing slash', async () => {
+  // A page's canonical path has no trailing slash below the language root.
+  // A link with one would be a 301 on every language switch.
+  it('links the other language of a page without a trailing slash', async () => {
     expect(await switchHref('privacy', 'de')).toBe('/en/privacy')
     expect(await switchHref('imprint', 'en')).toBe('/de/imprint')
+    expect(await switchHref('cv', 'de')).toBe('/en/cv')
   })
 
-  it('links the other language of any other page with a trailing slash', async () => {
-    expect(await switchHref('cv', 'de')).toBe('/en/cv/')
+  it('links the other language of the home page with the language root slash', async () => {
     expect(await switchHref('home', 'en')).toBe('/de/')
+    expect(await switchHref('not-found', 'en')).toBe('/de/')
   })
 })

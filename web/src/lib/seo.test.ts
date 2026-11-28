@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { routeTable } from './routeTable'
-import { canonical, descriptionKeys, NOT_FOUND, path, titleKeys } from './seo'
+import { canonical, descriptionKeys, hreflangAlternates, NOT_FOUND, path, titleKeys } from './seo'
 
 // titleKeys and descriptionKeys are kept separate from routes.json
 // deliberately (see seo.ts), which only stays safe as long as this test
@@ -57,16 +57,16 @@ describe('descriptionKeys', () => {
 
 describe('path and canonical', () => {
   // The path must be the one the server answers with 200 and the sitemap
-  // lists: a trailing slash, none for a legal page. Anything else is a 301.
+  // lists: a trailing slash only on the language root. Anything else is a 301.
   it.each(routeTable)('resolves routes.json entry $name to its served path', (entry) => {
-    const want =
-      entry.slug === '' ? '/de/' : entry.legal ? `/de/${entry.slug}` : `/de/${entry.slug}/`
+    const want = entry.slug === '' ? '/de/' : `/de/${entry.slug}`
     expect(path('de', entry.name)).toBe(want)
   })
 
-  it('gives cv a trailing slash and the imprint none', () => {
-    expect(canonical('en', 'cv')).toBe('https://simon-ostendorf.de/en/cv/')
+  it('gives every page below the language root no trailing slash', () => {
+    expect(canonical('en', 'cv')).toBe('https://simon-ostendorf.de/en/cv')
     expect(canonical('en', 'imprint')).toBe('https://simon-ostendorf.de/en/imprint')
+    expect(canonical('en', 'home')).toBe('https://simon-ostendorf.de/en/')
   })
 
   it.each(routeTable)(
@@ -82,5 +82,14 @@ describe('path and canonical', () => {
 
   it('builds a canonical URL for the 404 page without throwing', () => {
     expect(() => canonical('en', NOT_FOUND)).not.toThrow()
+  })
+})
+
+describe('hreflangAlternates', () => {
+  it('points x-default at the English page, the site default', () => {
+    const alternates = hreflangAlternates('imprint')
+    expect(alternates.find((a) => a.hreflang === 'x-default')?.href).toBe(
+      'https://simon-ostendorf.de/en/imprint',
+    )
   })
 })

@@ -1,10 +1,10 @@
 import type { Locale } from '../i18n'
-import { SUPPORTED_LOCALES } from '../i18n'
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../i18n'
 import { pagePath, routeTable } from './routeTable'
 
-/** The site's canonical origin. Overridable through VITE_SITE_URL for a
- *  staging build; the default matches the Go service's own default
- *  (internal/config.DefaultSiteURL). */
+/** The site's canonical origin, fixed at build time: the pages, sitemap.xml
+ *  and robots.txt carry it, so one frontend image serves one production
+ *  origin. Overridable through VITE_SITE_URL for a staging build. */
 export const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://simon-ostendorf.de'
 
 /** NOT_FOUND is the 404 page's own pseudo route: it answers no path of
@@ -31,12 +31,10 @@ const slugs: Record<string, string> = Object.fromEntries(
 )
 slugs[NOT_FOUND] = ''
 
-const legalRoutes = new Set(routeTable.filter((entry) => entry.legal).map((entry) => entry.name))
-
 /** path is the absolute path of route in locale, the exact path the server
  *  answers with 200: see pagePath. */
 export function path(locale: Locale, route: PageRoute): string {
-  return pagePath(locale, slugs[route], legalRoutes.has(route))
+  return pagePath(locale, slugs[route])
 }
 
 /** canonical is the absolute URL of route in locale. */
@@ -101,13 +99,13 @@ export function fullTitle(route: PageRoute, meta: PageMeta, siteName: string): s
 }
 
 /** hreflangAlternates lists every locale's canonical URL for route, plus
- *  the x-default entry pointing at German, this site's own default when a
- *  visitor's language is not one this site has a dedicated version for. */
+ *  the x-default entry pointing at the site default (English), for a
+ *  visitor whose language is not one this site has a version for. */
 export function hreflangAlternates(route: PageRoute): Array<{ hreflang: string; href: string }> {
   const alternates: Array<{ hreflang: string; href: string }> = SUPPORTED_LOCALES.map((locale) => ({
     hreflang: locale,
     href: canonical(locale, route),
   }))
-  alternates.push({ hreflang: 'x-default', href: canonical('de', route) })
+  alternates.push({ hreflang: 'x-default', href: canonical(DEFAULT_LOCALE, route) })
   return alternates
 }

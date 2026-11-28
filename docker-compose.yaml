@@ -1,13 +1,29 @@
 services:
-  website:
+  # The pages, on the one browser origin of this stack. govue's frontend
+  # forwards /api/ to the api service below, so the browser talks to one
+  # origin as it does in production, where the Ingress routes /api.
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
+      # Dockerfile builds the final stages "api" and "frontend"; naming the
+      # target keeps it explicit.
+      target: frontend
     restart: unless-stopped
     environment:
+      # ALLOW_PLAIN_HTTP: this compose file serves the site over plain
+      # HTTP on localhost, with nothing terminating TLS in front of it;
+      # without this the Strict-Transport-Security header would tell the
+      # browser to upgrade every later visit to localhost to HTTPS. Never
+      # set this on anything reachable from outside the machine it runs on.
+      ALLOW_PLAIN_HTTP: "true"
       ADDR: ":8080"
       ADMIN_ADDR: ":8081"
       LOG_LEVEL: "debug"
+      # The development switch: govue's frontend forwards /api/ to the api
+      # service. Only this stack sets it; the Helm chart never does. The
+      # port must be the one the api service listens on.
+      FRONTEND_DEV_API_PROXY: "http://api:8080"
       # Page view counting is off unless both are set, for example in .env.
       # Under compose a visitor arrives from a private bridge address and no
       # TRUSTED_PROXIES is set, so nothing is counted even with both set.
@@ -17,3 +33,19 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:8081:8081"
+    depends_on:
+      - api
+
+  # The API. Not published to the host: the browser reaches it through the
+  # frontend's /api/.
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    restart: unless-stopped
+    environment:
+      ALLOW_PLAIN_HTTP: "true"
+      ADDR: ":8080"
+      ADMIN_ADDR: ":8081"
+      LOG_LEVEL: "debug"

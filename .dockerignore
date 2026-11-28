@@ -7,5 +7,6 @@ bin
 docs
 web/node_modules
 web/dist
-cmd/website/dist
+web/.prerender-ssr
+cmd/frontend/dist
 charts

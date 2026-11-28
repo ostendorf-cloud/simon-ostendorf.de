@@ -6,7 +6,7 @@ import { GovueSkipLink } from '@ostendorf-cloud/govue'
 
 import AppFooter from './components/AppFooter.vue'
 import AppHeader from './components/AppHeader.vue'
-import { isLocale, type Locale } from './i18n'
+import { DEFAULT_LOCALE, isLocale, type Locale } from './i18n'
 import { usePageHead } from './lib/head'
 import { NOT_FOUND, type PageRoute } from './lib/seo'
 import { NOT_FOUND_ROUTE_NAME } from './router'
@@ -20,7 +20,7 @@ const pageRoute = computed<PageRoute>(() => {
 })
 const locale = computed<Locale>(() => {
   const value = route.params.locale
-  return typeof value === 'string' && isLocale(value) ? value : 'de'
+  return typeof value === 'string' && isLocale(value) ? value : DEFAULT_LOCALE
 })
 
 usePageHead(pageRoute, locale, i18n)

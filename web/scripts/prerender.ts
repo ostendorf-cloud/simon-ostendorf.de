@@ -2,12 +2,13 @@
  * Renders every route of every locale to static HTML, so a crawler and a
  * browser's first paint both get real markup instead of an empty <div
  * id="app">. Run through "task prerender", after "task web:build" has
- * written the SPA bundle and its manifest into cmd/website/dist.
+ * written the SPA bundle and its manifest into cmd/frontend/dist.
  *
- * The Go service embeds the files this script writes into
- * cmd/website/prerendered and serves them directly; the SPA bundle this
- * same page loads then hydrates over the server-rendered markup rather
- * than replacing it, through createSSRApp on both sides.
+ * The pages, the 404 page per locale and sitemap.xml are written into that
+ * same directory, govue's frontend build layout. cmd/frontend embeds it and
+ * serves every page named by the sitemap; the SPA bundle the page loads then
+ * hydrates over the server-rendered markup rather than replacing it,
+ * through createSSRApp on both sides.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -19,7 +20,13 @@ import { createMemoryHistory } from 'vue-router'
 import { useTheme } from '@ostendorf-cloud/govue'
 
 import App from '../src/App.vue'
-import { createAppI18n, installI18n, SUPPORTED_LOCALES, type Locale } from '../src/i18n'
+import {
+  createAppI18n,
+  DEFAULT_LOCALE,
+  installI18n,
+  SUPPORTED_LOCALES,
+  type Locale,
+} from '../src/i18n'
 import { pagePath, routeTable, type RouteEntry } from '../src/lib/routeTable'
 import {
   canonical,
@@ -35,8 +42,8 @@ import { THEME_NAME } from '../src/lib/theme'
 import { attachLocaleSync, createAppRouter, NOT_FOUND_ROUTE_NAME } from '../src/router'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const distDir = join(here, '../../cmd/website/dist')
-const outDir = join(here, '../../cmd/website/prerendered')
+const distDir = join(here, '../../cmd/frontend/dist')
+const outDir = distDir
 
 // The same call main.ts makes, so the theme attribute reaches the
 // prerendered <head> without a second copy of the theme name living
@@ -50,7 +57,7 @@ useTheme({ theme: THEME_NAME })
  *  route it names (the same string serves both now that PageRoute is a
  *  plain string), plus the one page the table itself does not carry: the
  *  404 page, which answers no route and so is not part of the table
- *  internal/webapp's sitemap and mux registration read either. */
+ *  the sitemap is built from either. */
 function loadPages(): Array<{ routerName: string; seoRoute: PageRoute; file: string }> {
   const pages = routeTable.map((entry) => ({
     routerName: entry.name,
@@ -186,18 +193,15 @@ function renderDocument(locale: Locale, head: string, body: string): string {
 }
 
 /** routeUrl is the absolute sitemap URL of a route table entry in locale:
- *  the same rule internal/webapp's routeURL applies, a trailing slash for
- *  every page except a legal one, whose canonical path is govue's
- *  /<locale>/<page>. */
+ *  /<locale>/<slug>, with no trailing slash below the language root. */
 function routeUrl(locale: Locale, entry: RouteEntry): string {
-  return SITE_URL + pagePath(locale, entry.slug, entry.legal)
+  return SITE_URL + pagePath(locale, entry.slug)
 }
 
-/** sitemapXml renders the sitemap govue-check-legal reads. The server serves
- *  its own sitemap.xml, built from the same route table and SITE_URL;
- *  cmd/website's TestPrerenderedSitemapMatchesServedSitemap fails when the
- *  two differ in a single byte, so this file is a build input for the check
- *  and never a second source of truth. */
+/** sitemapXml renders the sitemap of the build. govue's frontend package
+ *  serves it as built and serves exactly the pages whose loc it lists, and
+ *  govue-check-legal reads it too. The origin is SITE_URL, fixed at build
+ *  time. */
 function sitemapXml(): string {
   const entries = [...routeTable].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))
   const lines = [
@@ -213,7 +217,7 @@ function sitemapXml(): string {
         )
       }
       lines.push(
-        `    <xhtml:link rel="alternate" hreflang="x-default" href="${routeUrl('de', entry)}"/>`,
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${routeUrl(DEFAULT_LOCALE, entry)}"/>`,
         '  </url>',
       )
     }

@@ -23,10 +23,10 @@ Installs the pinned toolchain (Go, Node, pnpm, and the lint and release tooling)
 ## Use
 
 ```sh
-task web:build   # builds the SPA into cmd/website/dist
-task prerender    # renders every route and locale into cmd/website/prerendered
-task build        # compiles the website binary into bin/website
-bin/website
+task web:build   # builds the SPA into cmd/frontend/dist
+task prerender    # renders every route and locale into cmd/frontend/dist
+task build        # compiles bin/frontend and bin/api
+bin/frontend
 ```
 
 The server reads its configuration from the environment; see the Configuration table below.
@@ -106,7 +106,7 @@ task check
 
 `task check` runs every lint, build and test target one after another; `task --list` shows
 them individually. `task web:build` and `task prerender` both have to run before `task build`
-or `task test:go` can compile `cmd/website`, since it embeds both outputs; `task build` and
+or `task test:go` can compile `cmd/frontend`, since it embeds both outputs; `task build` and
 `task test:go` already declare that dependency, so running either one through Task is enough.
 
 Releases are driven by [release-me](https://github.com/ostendorf-cloud/release-me):
