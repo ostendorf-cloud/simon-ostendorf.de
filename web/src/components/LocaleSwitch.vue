@@ -14,17 +14,16 @@ const { t } = useI18n()
 
 const otherLocale = computed<Locale>(() => (route.params.locale === 'de' ? 'en' : 'de'))
 // A repeatable param resolved with no entries, the not-found route's own
-// pathMatch for instance, drops the trailing slash the route pattern
-// otherwise always carries; restored here so the link is already
-// canonical instead of relying on the server's own redirect for it.
+// pathMatch for instance, drops the slash of the language root /<locale>/;
+// restored here so the link is already canonical instead of relying on the
+// server's own redirect for it. Every other page has no trailing slash.
 const target = computed(() => {
   const href = router.resolve({
     name: route.name ?? undefined,
     params: { ...route.params, locale: otherLocale.value },
     hash: route.hash,
   }).href
-  // A legal page's canonical path has no trailing slash, so it is left as is.
-  return href.endsWith('/') || route.meta.legal === true ? href : `${href}/`
+  return href.replace(/^(\/(?:de|en))(?=$|[?#])/, '$1/')
 })
 </script>
 

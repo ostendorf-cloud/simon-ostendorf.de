@@ -7,8 +7,8 @@ export interface RouteEntry {
   name: string
   slug: string
   file: string
-  /** One of govue's legal pages: canonical path /<locale>/<slug>, no
-   *  trailing slash. Mirrors Route.Legal in routes.go. */
+  /** One of govue's legal pages, linked by its footer. Mirrors Route.Legal
+   *  in routes.go. */
   legal?: boolean
 }
 
@@ -19,14 +19,15 @@ export const LEGAL_SLUGS: readonly string[] = ['imprint', 'privacy', 'terms']
  * pagePath is the canonical path of a page in locale, the one rule the
  * canonical and hreflang URLs, the sitemap and the router share with the
  * server (govue's frontend package serves the sitemap's loc paths as they
- * are): a trailing slash, except for a legal page, whose path is govue's /<locale>/<page>. The home
- * page and the 404 page have an empty slug and give /<locale>/.
+ * are and refuses a loc with a trailing slash below the language root): no
+ * trailing slash, /<locale>/<slug>. The home page and the 404 page have an
+ * empty slug and give the language root /<locale>/.
  */
-export function pagePath(locale: string, slug: string, legal = false): string {
+export function pagePath(locale: string, slug: string): string {
   if (slug === '') {
     return `/${locale}/`
   }
-  return legal ? `/${locale}/${slug}` : `/${locale}/${slug}/`
+  return `/${locale}/${slug}`
 }
 
 /**

@@ -97,7 +97,7 @@ import { OPERATOR } from './operator'
         <p>An Umami werden folgende Angaben gesendet:</p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
           <li>
-            die aufgerufene Seite als Routenmuster, zum Beispiel <code>/de/cv/</code>, nie die
+            die aufgerufene Seite als Routenmuster, zum Beispiel <code>/de/cv</code>, nie die
             Adresse mit Parametern oder einem Suchanfrageteil
           </li>
           <li>die Herkunft einer verweisenden Website (Schema, Host, Port), nie ihr Pfad</li>

@@ -99,7 +99,7 @@ import { OPERATOR } from './operator'
         <p>The following is sent to Umami:</p>
         <ul class="flex list-disc flex-col gap-2 pl-6">
           <li>
-            the page as a route pattern, for example <code>/en/cv/</code>, never the address with
+            the page as a route pattern, for example <code>/en/cv</code>, never the address with
             parameters or a query string
           </li>
           <li>the origin of a referring website (scheme, host, port), never its path</li>

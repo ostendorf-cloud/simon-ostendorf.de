@@ -29,13 +29,13 @@ export const NOT_FOUND_ROUTE_NAME = 'not-found'
 
 /** routePath is the router path pattern for slug, the home page's own
  *  empty slug included. */
-function routePath(slug: string, legal = false): string {
+function routePath(slug: string): string {
   if (slug === '') {
     return '/:locale(de|en)/'
   }
-  // A legal page's canonical path is govue's /<locale>/<page>, with no
-  // trailing slash: the server answers the slash form with a redirect.
-  return legal ? `/:locale(de|en)/${slug}` : `/:locale(de|en)/${slug}/`
+  // A page's canonical path is /<locale>/<slug>, with no trailing slash:
+  // the server answers the slash form with a redirect.
+  return `/:locale(de|en)/${slug}`
 }
 
 /** pageRoutes builds one vue-router route per routes.json entry: adding a
@@ -43,7 +43,7 @@ function routePath(slug: string, legal = false): string {
  *  matching entry also exists in views above (router/index.test.ts is
  *  the check for that). Exported for that test. */
 export const pageRoutes: RouteRecordRaw[] = routeTable.map((entry) => ({
-  path: routePath(entry.slug, entry.legal),
+  path: routePath(entry.slug),
   name: entry.name,
   component: views[entry.name] ?? notFoundView,
   meta: { legal: entry.legal === true },

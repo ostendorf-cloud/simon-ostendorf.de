@@ -31,12 +31,10 @@ const slugs: Record<string, string> = Object.fromEntries(
 )
 slugs[NOT_FOUND] = ''
 
-const legalRoutes = new Set(routeTable.filter((entry) => entry.legal).map((entry) => entry.name))
-
 /** path is the absolute path of route in locale, the exact path the server
  *  answers with 200: see pagePath. */
 export function path(locale: Locale, route: PageRoute): string {
-  return pagePath(locale, slugs[route], legalRoutes.has(route))
+  return pagePath(locale, slugs[route])
 }
 
 /** canonical is the absolute URL of route in locale. */

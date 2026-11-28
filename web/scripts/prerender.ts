@@ -193,10 +193,9 @@ function renderDocument(locale: Locale, head: string, body: string): string {
 }
 
 /** routeUrl is the absolute sitemap URL of a route table entry in locale:
- *  a trailing slash for every page except a legal one, whose canonical
- *  path is govue's /<locale>/<page>. */
+ *  /<locale>/<slug>, with no trailing slash below the language root. */
 function routeUrl(locale: Locale, entry: RouteEntry): string {
-  return SITE_URL + pagePath(locale, entry.slug, entry.legal)
+  return SITE_URL + pagePath(locale, entry.slug)
 }
 
 /** sitemapXml renders the sitemap of the build. govue's frontend package
