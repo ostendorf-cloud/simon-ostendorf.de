@@ -18,8 +18,8 @@ export const LEGAL_SLUGS: readonly string[] = ['imprint', 'privacy', 'terms']
 /**
  * pagePath is the canonical path of a page in locale, the one rule the
  * canonical and hreflang URLs, the sitemap and the router share with the
- * server (internal/webapp's routePattern and routeURL): a trailing slash,
- * except for a legal page, whose path is govue's /<locale>/<page>. The home
+ * server (govue's frontend package serves the sitemap's loc paths as they
+ * are): a trailing slash, except for a legal page, whose path is govue's /<locale>/<page>. The home
  * page and the 404 page have an empty slug and give /<locale>/.
  */
 export function pagePath(locale: string, slug: string, legal = false): string {
